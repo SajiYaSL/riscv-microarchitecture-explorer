@@ -3,7 +3,7 @@ export type Instruction = {pc:number;line:number;text:string;op:Op;rd?:number;rs
 export type Program = {instructions:Instruction[];source:string};
 const ops = new Set(['ADD','ADDI','SUB','AND','OR','XOR','MUL','LW','SW','BEQ','BNE','JAL','NOP']);
 const reg=(s:string,line:number)=>{const m=/^x(\d+)$/i.exec(s.trim()); if(!m||Number(m[1])>31)throw Error(`Line ${line}: invalid register "${s}" (expected x0–x31)`);return Number(m[1]);};
-const num=(s:string,line:number)=>{if(!/^-?(?:0x[0-9a-f]+|\d+)$/i.test(s))throw Error(`Line ${line}: invalid immediate "${s}"`);return Number(s);};
+const num=(s:string,line:number)=>{if(!/^-?(?:0x[0-9a-f]+|\d+)$/i.test(s))throw Error(`Line ${line}: invalid immediate "${s}"`);const value=s.startsWith('-')?-Number(s.slice(1)):Number(s);if(!Number.isSafeInteger(value))throw Error(`Line ${line}: immediate out of range`);return value;};
 export function assemble(source:string):Program {
  const lines=source.split('\n'), labels=new Map<string,number>(), tokens:{line:number;text:string;pc:number}[]=[];
  for(let i=0;i<lines.length;i++){
@@ -26,8 +26,8 @@ export function assemble(source:string):Program {
    if(op==='LW')ins.rd=reg(rest[0],line);else ins.rs2=reg(rest[0],line);
    ins.imm=num(m[1],line);ins.rs1=reg(m[2],line);
    if(ins.imm < -2048 || ins.imm > 2047)throw Error(`Line ${line}: memory offset must fit signed 12 bits`);
-  }else if(op==='BEQ'||op==='BNE'){ins.rs1=reg(rest[0],line);ins.rs2=reg(rest[1],line);ins.target=labels.get(rest[2]);if(ins.target===undefined)throw Error(`Line ${line}: unknown branch label ${rest[2]}`);}
-  else if(op==='JAL'){ins.rd=reg(rest[0],line);ins.target=labels.get(rest[1]);if(ins.target===undefined)throw Error(`Line ${line}: unknown jump label ${rest[1]}`);}
+  }else if(op==='BEQ'||op==='BNE'){ins.rs1=reg(rest[0],line);ins.rs2=reg(rest[1],line);ins.target=labels.get(rest[2]);if(ins.target===undefined)throw Error(`Line ${line}: unknown branch label "${rest[2]}". Define ${rest[2]}: or use an existing label.`);}
+  else if(op==='JAL'){ins.rd=reg(rest[0],line);ins.target=labels.get(rest[1]);if(ins.target===undefined)throw Error(`Line ${line}: unknown jump label "${rest[1]}". Define ${rest[1]}: or use an existing label.`);}
   return ins;
  });
  return {source,instructions};

@@ -1,8 +1,10 @@
+import {runOoo, DEFAULT_CONFIG, validateConfig, type OooSnapshot, type CPUConfig} from '../cpu/ooo/engine';
+import {runPipeline, type Snapshot} from '../cpu/inorder/engine';
 import type {Instruction,Program} from './assembler';
 export type Mode='inorder'|'ooo';
 export type Trace={id:number;ins:Instruction;reads:number[];write?:number;value?:number;addr?:number;store?:number;taken?:boolean;beforePC:number;afterPC:number};
-export type Scheduled=Trace&{fetch:number;decode:number;execute:number;executeEnd:number;memory:number;commit:number;stalls:number;unit:number};
-export type Simulation={mode:Mode;events:Scheduled[];totalCycles:number;retired:number;ipc:number;cpi:number;stalls:number;registers:number[];memory:Map<number,number>;instructions:Instruction[];truncated:boolean};
+export type Scheduled=Trace&{fetch:number;decode:number;execute:number;executeEnd:number;memory:number;commit:number;stalls:number;unit:number;cycleStages?:Record<number,Stage>};
+export type Simulation={mode:Mode;events:Scheduled[];totalCycles:number;retired:number;ipc:number;cpi:number;stalls:number;registers:number[];memory:Map<number,number>;instructions:Instruction[];truncated:boolean;snapshots?:Snapshot[];oooSnapshots?:OooSnapshot[];fault?:string};
 const int=(n:number)=>n|0;
 const reads=(ins:Instruction)=>{
  const arr:number[]=[];
@@ -12,10 +14,10 @@ const reads=(ins:Instruction)=>{
 };
 const writes=(ins:Instruction)=>ins.rd!==undefined && ins.rd!==0?ins.rd:undefined;
 /** Independent sequential ISA oracle: no pipeline timing assumptions. */
-export function executeProgram(program:Program,maxSteps=160):{trace:Trace[];registers:number[];memory:Map<number,number>;truncated:boolean}{
+export function executeProgram(program:Program,maxSteps=160):{trace:Trace[];registers:number[];memory:Map<number,number>;truncated:boolean;pc:number;fault?:string}{
  const regs=new Array<number>(32).fill(0),memory=new Map<number,number>(),trace:Trace[]=[];
- let pc=0;
- while(pc>=0&&pc<program.instructions.length*4&&trace.length<maxSteps){
+ let pc=0;let fault:string|undefined;
+ execution: while(pc>=0&&pc<program.instructions.length*4&&trace.length<maxSteps){
   const ins=program.instructions[pc/4];if(!ins)throw Error(`Invalid PC 0x${pc.toString(16)}`);
   const a=regs[ins.rs1??0],b=regs[ins.rs2??0];let value:number|undefined,addr:number|undefined,store:number|undefined,taken=false;
   let next=pc+4;
@@ -23,8 +25,8 @@ export function executeProgram(program:Program,maxSteps=160):{trace:Trace[];regi
    case 'ADD':value=int(a+b);break; case 'ADDI':value=int(a+(ins.imm??0));break;
    case 'SUB':value=int(a-b);break;case 'AND':value=a&b;break;case 'OR':value=a|b;break;case 'XOR':value=a^b;break;
    case 'MUL':value=Math.imul(a,b);break;
-   case 'LW':addr=int(a+(ins.imm??0));if(addr%4!==0)throw Error(`Line ${ins.line}: misaligned word load at ${addr}`);value=memory.get(addr)??0;break;
-   case 'SW':addr=int(a+(ins.imm??0));if(addr%4!==0)throw Error(`Line ${ins.line}: misaligned word store at ${addr}`);store=b;memory.set(addr,b);break;
+   case 'LW':addr=(a+(ins.imm??0))>>>0;if(addr%4!==0){fault=`Line ${ins.line}: misaligned word load at ${addr}`;break execution;}value=memory.get(addr)??0;break;
+   case 'SW':addr=(a+(ins.imm??0))>>>0;if(addr%4!==0){fault=`Line ${ins.line}: misaligned word store at ${addr}`;break execution;}store=b;memory.set(addr,b);break;
    case 'BEQ':case 'BNE':taken=ins.op==='BEQ'?a===b:a!==b;if(taken)next=ins.target!;break;
    case 'JAL':value=pc+4;next=ins.target!;taken=true;break;
    case 'NOP':break;
@@ -33,69 +35,44 @@ export function executeProgram(program:Program,maxSteps=160):{trace:Trace[];regi
   trace.push({id:trace.length,ins,reads:reads(ins),write,value,addr,store,taken,beforePC:pc,afterPC:next});
   pc=next;
  }
- return {trace,registers:regs,memory,truncated:trace.length>=maxSteps&&pc>=0&&pc<program.instructions.length*4};
+ return {trace,registers:regs,memory,pc,fault,truncated:trace.length>=maxSteps&&pc>=0&&pc<program.instructions.length*4};
 }
-const latency=(t:Trace)=>t.ins.op==='MUL'?4:t.ins.op==='LW'?2:1;
-const isControl=(t:Trace)=>['BEQ','BNE','JAL'].includes(t.ins.op);
-/** Pedagogical five-stage pipeline timing: single fetch/decode/execute lane, ALU forwarding,
- *  load-use interlock, and resolved-taken-branch fetch bubbles. Not an RTL cycle model. */
-function scheduleInorder(trace:Trace[]):Scheduled[]{
- const out:Scheduled[]=[];let nextFetch=1,lastDecode=0,lastExecuteEnd=0,lastCommit=0;
- for(const t of trace){
-  let fetch=Math.max(nextFetch,lastDecode),decode=Math.max(fetch+1,lastDecode+1),execute=Math.max(decode+1,lastExecuteEnd+1),stalls=0;
-  for(const dep of out){if(dep.write!==undefined&&t.reads.includes(dep.write)){
-    const latest=out.findLast(x=>x.id< t.id&&x.write===dep.write);
-    if(latest?.id===dep.id){const ready=dep.ins.op==='LW'?dep.memory+1:dep.executeEnd+1;execute=Math.max(execute,ready);}
-  }}
-  // Decode is held while an older instruction occupies the issue path.
-  decode=Math.max(decode,execute-1);stalls=Math.max(0,decode-(fetch+1));
-  const executeEnd=execute+latency(t)-1;
-  const memory=executeEnd+1;
-  const commit=Math.max(memory+1,lastCommit+1);
-  out.push({...t,fetch,decode,execute,executeEnd,memory,commit,stalls,unit:0});
-  nextFetch=fetch+1;
-  if(isControl(t)&&t.taken)nextFetch=Math.max(nextFetch,executeEnd+2);
-  lastDecode=decode;lastExecuteEnd=executeEnd;lastCommit=commit;
+export function simulate(program:Program,mode:Mode,config:CPUConfig=DEFAULT_CONFIG):Simulation{
+ const errors=validateConfig(config);if(errors.length)throw Error(errors.join('; '));
+ if(mode==='inorder'){
+  const snapshots=runPipeline(program,2000,160,config),last=snapshots.at(-1)!;
+
+  const events:Scheduled[]=last.retired.map(l=>{
+   const at=(stage:keyof Snapshot['stages'])=>snapshots.filter(s=>s.stages[stage]?.id===l.id).map(s=>s.cycle);
+   const fetch=at('IF')[0],decode=at('ID').at(-1)!,execute=at('EX')[0],executeEnd=at('EX').at(-1)!,memory=at('MEM')[0],commit=at('WB')[0];
+   return {id:l.id,ins:l.ins,reads:reads(l.ins),write:writes(l.ins),value:l.value,addr:l.addr,store:l.store,
+    taken:l.nextPC!==l.ins.pc+4,beforePC:l.ins.pc,afterPC:l.nextPC,fetch,decode,execute,executeEnd,memory,commit,
+    stalls:Math.max(0,execute-fetch-2),unit:0,cycleStages:Object.fromEntries(snapshots.flatMap(s=>Object.entries(s.stages).filter(([,entry])=>entry?.id===l.id).map(([stage])=>[s.cycle,stage as Stage])))};
+  });
+  const totalCycles=last.cycle,retired=events.length;
+  return {mode,events,totalCycles,retired,ipc:retired/totalCycles,cpi:retired?totalCycles/retired:0,
+   stalls:last.stalls,registers:last.registers,memory:last.memory,instructions:program.instructions,truncated:!last.halted,fault:last.fault,snapshots};
  }
- return out;
-}
-/** Simplified speculative-free OoO timing: one dispatch/cycle, two execution units,
- * finite ROB, tagged dependencies, in-order single retirement. Control redirects serialize.
- * All instruction values come from an independent sequential ISA oracle. */
-function scheduleOoo(trace:Trace[]):Scheduled[]{
- const out:Scheduled[]=[];let fetchNext=1,commitPrev=0;const units=[0,0];const robSize=8;
- for(const t of trace){
-  let fetch=fetchNext;
-  if(out.length>=robSize)fetch=Math.max(fetch,out[out.length-robSize].commit);
-  let decode=fetch+1;
-  let earliest=decode+1;
-  for(const r of t.reads){const producer=out.findLast(x=>x.write===r);if(producer)earliest=Math.max(earliest,producer.executeEnd+1);}
-  // A store/load cannot bypass older unresolved memory operations in this teaching model.
-  if(t.ins.op==='LW'||t.ins.op==='SW'){
-   const mem=out.findLast(x=>x.ins.op==='LW'||x.ins.op==='SW');if(mem)earliest=Math.max(earliest,mem.memory+1);
-  }
-  let unit=units[0]<=units[1]?0:1;
-  let execute=Math.max(earliest,units[unit]+1);
-  if(isControl(t)){execute=Math.max(execute,...units.map(x=>x+1));}
-  const executeEnd=execute+latency(t)-1;units[unit]=executeEnd;
-  const memory=executeEnd+1;
-  const commit=Math.max(memory+1,commitPrev+1);
-  const stalls=Math.max(0,execute-(decode+1));
-  out.push({...t,fetch,decode,execute,executeEnd,memory,commit,stalls,unit});
-  fetchNext=fetch+1;
-  // No speculative wrong-path instructions are fetched. Control stops dispatch until resolved.
-  if(isControl(t))fetchNext=Math.max(fetchNext,executeEnd+2);
-  commitPrev=commit;
- }
- return out;
-}
-export function simulate(program:Program,mode:Mode):Simulation{
- const oracle=executeProgram(program);
- const events=mode==='inorder'?scheduleInorder(oracle.trace):scheduleOoo(oracle.trace);
- const totalCycles=events.at(-1)?.commit??0;
- return {mode,events,totalCycles,retired:events.length,ipc:totalCycles?events.length/totalCycles:0,cpi:events.length?totalCycles/events.length:0,stalls:events.reduce((s,t)=>s+t.stalls,0),registers:oracle.registers,memory:oracle.memory,instructions:program.instructions,truncated:oracle.truncated};
+ const oooSnapshots=runOoo(program,config),last=oooSnapshots.at(-1)!;
+ const events:Scheduled[]=last.retired.map(e=>{
+  const life=last.instructions.find(l=>l.id===e.id)!;
+  const at=(phase:string)=>Number(Object.entries(life.history).find(([,p])=>p===phase)?.[0]??0);
+  const execute=at('Issue'),executeEnd=at('Writeback');
+  return {id:e.id,ins:e.ins,reads:reads(e.ins),write:writes(e.ins),value:e.value,addr:e.addr,store:e.store,
+   taken:e.nextPC!==e.ins.pc+4,beforePC:e.ins.pc,afterPC:e.nextPC,
+   fetch:at('Fetch'),decode:at('Decode'),execute,executeEnd,memory:executeEnd,commit:life.retired!,
+   stalls:Object.values(life.history).filter(p=>p==='Stall').length,unit:({ALU:0,MUL:1,MEM:2,BR:3})[e.unit]};
+ });
+ const totalCycles=last.cycle,retired=events.length;
+ return {mode,events,totalCycles,retired,ipc:retired/totalCycles,cpi:retired?totalCycles/retired:0,
+  stalls:last.stalls,registers:last.registers,memory:last.memory,instructions:program.instructions,
+  truncated:!last.halted,fault:last.fault,oooSnapshots};
 }
 export function stateAt(sim:Simulation,cycle:number){
+ const snapshots=sim.snapshots??sim.oooSnapshots;
+ if(snapshots){const s=snapshots[Math.max(0,Math.min(Math.floor(cycle),snapshots.length-1))];
+  return {registers:s.registers,memory:s.memory,retired:s.retired.length,pc:s.pc,lastWrite:s.retired.at(-1)?.ins.rd};}
+
  const registers=Array<number>(32).fill(0),memory=new Map<number,number>();
  const retired=sim.events.filter(e=>e.commit<=cycle);
  for(const e of retired){if(e.write!==undefined&&e.value!==undefined)registers[e.write]=e.value;if(e.store!==undefined&&e.addr!==undefined)memory.set(e.addr,e.store);}
@@ -104,6 +81,7 @@ export function stateAt(sim:Simulation,cycle:number){
 }
 export type Stage='IF'|'ID'|'EX'|'MEM'|'WB'|'WAIT'|'DONE'|'NOT STARTED';
 export function stageAt(e:Scheduled,c:number):Stage{
+ if(e.cycleStages)return e.cycleStages[c]??(c<e.fetch?'NOT STARTED':c>e.commit?'DONE':'WAIT');
  if(c<e.fetch)return 'NOT STARTED';if(c===e.fetch)return 'IF';if(c<=e.decode)return 'ID';
  if(c<e.execute)return 'WAIT';if(c<=e.executeEnd)return 'EX';if(c===e.memory)return 'MEM';
  if(c<e.commit)return 'WAIT';if(c===e.commit)return 'WB';return 'DONE';

@@ -1,177 +1,180 @@
-# RISC-V Microarchitecture Explorer
-
-An interactive educational platform for understanding
-in-order and out-of-order RISC-V CPU execution.
-
-## Live Demo
-
-[Launch RISC-V Microarchitecture Explorer](YOUR_VERCEL_URL)
-
-## Features
-
-- In-order CPU pipeline simulation
-- Out-of-order instruction execution
-- RISC-V assembly editor
-- Register and memory visualization
-- Performance comparison
-
-
-
-
-
-
-
-
-
 # RVMX — RISC-V Microarchitecture Explorer
 
-**Interactive CPU execution and performance visualization for learning in-order and out-of-order microarchitecture.**
+An interactive, entirely client-side CPU architecture lab. Write RV32 assembly,
+follow real pipeline state, inspect physical-register dependencies, and compare
+independent in-order and out-of-order execution against an architectural interpreter.
 
-A free, fully client-side educational web app: edit RISC-V assembly, assemble it, step clock cycles, inspect a five-stage pipeline or simplified OoO scheduler, watch architectural registers and memory, and compare estimated performance.
-
-> **Scope / accuracy:** This is a teaching simulator, **not a cycle-accurate RTL implementation or a full RISC-V emulator**. Both timing models share an independent sequential instruction interpreter to determine the correct architectural path and instruction results. The in-order model uses a simplified five-stage, single-lane schedule with dependencies, stalls, and taken-branch penalties. The OoO model uses two simplified execution units, a bounded eight-entry ROB, data dependency tracking, no wrong-path speculation, and single in-order retirement. It is intended to explain concepts, not predict silicon performance. The branch visualizer does not animate speculative wrong-path flushing. MUL is an educational RV32M extension, not part of RV32I.
+![RVMX CPU Explorer](docs/screenshots/cpu-explorer.png)
 
 ## Features
 
-- Assembly playground with labels and example programs: data hazards, independent work, branches, load-use, and loops.
-- Instruction interpreter with 32 registers (`x0` fixed at zero), PC, aligned word load/store, and byte-addressed word locations.
-- In-order IF / ID / EX / MEM / WB pipeline display and cycle timeline.
-- Simplified out-of-order scheduling, dependency waits, execution lanes, and in-order retirement.
-- Cycle stepping, autoplay, reset, retired instruction trace, and register / memory inspector.
-- Performance Lab comparing estimated total cycles, CPI, IPC, and scheduler wait cycles.
-- Responsive web interface; runs entirely in the browser without a database or backend.
-- Automated unit tests using Vitest.
+- Five-stage in-order CPU with explicit latches, forwarding, load-use bubbles,
+  configurable blocking execution latency, branch redirects and retirement.
+- Independent OoO CPU with physical registers, speculative RAT, committed map,
+  free list, bounded issue queue, oldest-ready selection, four execution units,
+  ROB, in-order retirement and conservative load/store ordering.
+- Static, one-bit and two-bit branch prediction, actual wrong-path execution,
+  younger squash, mapping recovery and precise fatal alignment faults.
+- Clickable SVG architecture diagrams connected to live snapshots.
+- ROB/head eligibility, source readiness/tags, RAT/physical register and LSQ viewers.
+- Syntax-highlighted assembly editor, labels, line numbers, validation and
+  executing-line highlighting; eleven original, explained examples.
+- Run/pause, reset, previous/next clock, finish, animation speed, history slider,
+  instruction lifecycle inspection including squashes and stall reasons.
+- Committed register/memory inspectors with changed-value highlights.
+- Event-derived IPC/CPI, stalls, predictor accuracy, squashes, recovery clocks,
+  queue occupancy and unit utilization charts.
+- Side-by-side independent timelines, completion/retirement order and automatic
+  register/memory/PC/fault verification against the sequential interpreter.
+- Validated CPU configuration; apply resets both engines cleanly.
+- Responsive dark dashboard and architecture learning center.
 
-## 1. Ubuntu prerequisites
+No backend, account, paid API or private repository dependency is required.
+This is a simplified **RV32 teaching model**, not full ISA compliance, RTL cycle
+accuracy or a predictor of physical CPU performance.
 
-Install Git, VS Code, and a modern Node.js (Node.js **22.12+ recommended**; Node.js 20.19+ is also suitable for this Vite generation). Check versions:
+## Architecture
 
-```bash
-node --version
-npm --version
-git --version
+```mermaid
+flowchart LR
+  Source[Assembly editor] --> Parse[Validate / resolve labels]
+  Parse --> IO[IF → ID → EX → MEM → WB]
+  Parse --> OOO[Fetch → Decode → Rename → Dispatch]
+  OOO --> Issue[Oldest-ready issue]
+  Issue --> Units[ALU / MUL / Memory / Branch]
+  Units --> ROB[ROB completion]
+  ROB --> Commit[Ordered retirement]
+  ROB -->|Mispredict: discard younger work| OOO
+  IO --> History[Clock snapshots / visualizations]
+  Commit --> History
 ```
 
-**Recommended Node installation via nvm** (see https://github.com/nvm-sh/nvm for current installation instructions). After nvm is installed:
+Architectural state is distinct from speculative pipeline/rename state. Both
+engines calculate their own values and branches. The interpreter is used only
+for verification. Stores become visible at retirement; squashed operations
+cannot change architectural registers or memory.
 
-```bash
-nvm install 22
-nvm use 22
-```
+## Supported instruction subset
 
-VS Code download: https://code.visualstudio.com/docs/setup/linux
+| Instructions | Behavior |
+| --- | --- |
+| ADD, SUB, AND, OR, XOR | 32-bit register operations with wraparound |
+| ADDI | Signed 12-bit immediate |
+| MUL | Low 32-bit product, educational RV32M subset |
+| LW, SW | Aligned 32-bit words, signed 12-bit offset |
+| BEQ, BNE | Conditional control flow to a label |
+| JAL | Label jump with link register |
+| NOP | No effect; still retires |
 
-## 2. Open the project in VS Code
+Use x0–x31, decimal or signed hexadecimal immediates, labels such as `loop:`,
+and offsets such as `0(x1)`. The editor decodes assembly, not machine words.
+Memory is sparse, zero-initialized word storage at unsigned byte addresses
+wrapping modulo 2^32. Misaligned accesses cause a precise fatal simulator fault,
+including loads into x0. No byte accesses or endianness behavior is exposed.
 
-Extract `riscv-microarchitecture-explorer.zip` and open a terminal:
+Unsupported: other RV32I/M instructions, RV64, compressed/floating-point/vector
+instructions, atomics, CSRs, interrupts, privileged trap handlers, virtual memory,
+MMIO, caches and self-modifying code. Runs are bounded to 128 static instructions,
+160 retirements or 2,000 clocks. A safety stop is never labeled verified.
 
-```bash
-cd ~/Downloads/riscv-microarchitecture-explorer
-code .
-```
+## Ubuntu installation and VS Code
 
-If you extracted it elsewhere, adjust the path. In VS Code open **Terminal → New Terminal**.
-
-## 3. Install and run
+Install Git, Node.js **22.12+** and npm using your preferred Ubuntu setup.
+Clone your public repository and open it in VS Code (`code .`). In the integrated
+terminal:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Visit the address Vite prints (usually **http://localhost:5173**).
-
-The first load selects **Data Hazards**. Click **Assemble & Run**, then **Next** or **Play**. Switch between **In-Order** and **Out-of-Order**. Use the **Performance Lab** tab to compare.
-
-## 4. Tests and production build
-
-```bash
-npm test
-npm run build
-npm run preview
-```
-
-The production output is in `dist/`. Never commit `node_modules/` or `dist/`.
-
-## 5. Publish on GitHub
-
-1. Create an empty repository on https://github.com/new named `riscv-microarchitecture-explorer` (do not initialize with README or license, since both are included).
-2. In the project folder run:
+Open the local URL printed by Vite. Select an example and click **Assemble / load**.
+Step clocks or click **Run**. Switch CPU mode to inspect the same program.
+Open **Configure** to apply parameters and reset both histories. **Performance
+Lab** verifies the complete runs and compares independently modeled timing.
 
 ```bash
-git init
-git add .
-git commit -m "Initial release: RISC-V Microarchitecture Explorer"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/riscv-microarchitecture-explorer.git
-git push -u origin main
+npm test              # deterministic unit and differential tests
+npm run test:watch    # watch tests during development
+npm run build         # strict TypeScript + static production build
+npm run preview       # inspect the production build
+npm run test:browser  # optional headless Chrome smoke checks + screenshots
 ```
 
-Replace `YOUR_USERNAME` with your account. If your Git author isn't set, configure it first with `git config --global user.name "Your Name"` and `git config --global user.email "you@example.com"`.
+Browser checks require Google Chrome on PATH, or `CHROME_BIN` pointing to a
+compatible Chromium executable. They use an isolated temporary profile and
+localhost ports 5175/9224; regular tests/build need no browser installation.
 
-**If an existing remote repository is not empty**, don't force-push. Clone it or fetch and reconcile the remote history before pushing.
+## Configuration and interpretation
 
-## 6. Host publicly for free on Vercel
+Fetch/decode/issue widths (1–4), ROB size (2–64), physical registers (33–128),
+issue capacity (1–64), ALU latency (1–8), MUL latency (1–16), and predictor mode
+are configurable. Only execution latencies apply to in-order. OoO has one
+nonpipelined unit of each kind and fixed one-instruction retirement width.
+A wide configuration can still be limited by dependencies, unit conflicts,
+physical registers or memory ordering; OoO is not guaranteed to be faster.
 
-Vercel's **Hobby** plan can host qualifying non-commercial personal projects for free, subject to the provider's current usage and fair-use rules.
+Loads/stores wait for all older memory operations to retire. There is no memory
+speculation or store forwarding. Recovery reconstructs mappings functionally;
+recovery clocks count frontend suppression, not a measured counterfactual cost.
+Predictor training/statistics include speculative resolutions. Stall definitions
+and stage-based utilization differ between the two models and are labeled.
 
-1. Visit https://vercel.com and sign in with GitHub.
-2. Click **Add New → Project** and **Import** your repository.
-3. Choose **Vite** as the framework (usually auto-detected).
-4. Use **Build Command:** `npm run build` and **Output Directory:** `dist`.
-5. Click **Deploy**. Vercel provides an HTTPS `*.vercel.app` public URL.
-6. Every subsequent push to your main branch can automatically deploy updated code.
+## Verification
 
-No environment variables, API keys, server, or database are required. The project includes `vercel.json` for static SPA rewrites.
+[CPU verification assembly](examples/cpu-verification.s) checks arithmetic, memory,
+load-use, branches, jumps and x0. Every branch/jump target must have a matching
+label, even if the branch is expected not to be taken.
 
-Alternative: **GitHub Pages** works for static frontends, but requires a base-path adjustment and a deployment workflow. Vercel is simpler for this Vite project.
+**79 automated tests** cover directed behavior, state invariants and seeded
+programs. Differential checks compare all registers, memory, retired PC sequence,
+final PC and fatal faults. Real Chrome smoke checks exercise every example,
+both diagrams, stepping/replay, configuration, faults, verified comparison and
+responsive layout. See [verification details](docs/VERIFICATION.md).
 
-## Code layout
+## Static hosting: GitHub and Vercel
 
-```text
-src/
-  engine/
-    assembler.ts     # Parses assembly, resolves labels, checks operands
-    simulator.ts     # Instruction interpreter, timing models, snapshots
-    programs.ts      # Example RISC-V assembly programs
-  App.tsx            # Interactive editor, pipeline, timeline, register and memory UI
-  styles.css         # Responsive dark-theme design
-  main.tsx           # React entry point
-tests/
-  simulator.test.ts  # Unit tests
-vercel.json          # Vercel deployment settings
-```
+After tests/build pass, inspect the diff, commit the independent public files,
+and push your existing GitHub branch. Do not overwrite remote history.
 
-## Supported instructions and limitations
+Import the GitHub repository into Vercel and select **Vite**, build command
+`npm run build`, output directory `dist`. No environment variables are required.
+The existing `vercel.json` supports static SPA routing. Eligible personal projects
+can use Vercel Hobby subject to the provider's current plan terms. This repository
+has been built locally; no new public deployment is claimed.
 
-| Instructions | Behavior |
-| --- | --- |
-| `ADD`, `SUB`, `AND`, `OR`, `XOR` | 32-bit register arithmetic / bitwise |
-| `ADDI` | Signed 12-bit immediate |
-| `MUL` | Low 32 bits; simplified four-cycle modeled latency (RV32M) |
-| `LW`, `SW` | Aligned 32-bit word accesses (zero-initialized word-addressed data) |
-| `BEQ`, `BNE` | Label-based conditional branch |
-| `JAL` | Label jump with link register |
-| `NOP` | No operation |
+GitHub Actions runs install, tests and build. For GitHub Pages hosting, additionally
+configure Vite's base path to the repository name and add a Pages artifact/deploy
+workflow; the current base `/` targets root hosting such as Vercel.
 
-Registers must be written `x0`–`x31`; offsets use `0(x1)`; labels use `loop:`; immediates support signed decimal and hex. Programs run from PC 0. Branch offsets, real instruction encodings, exceptions, CSR operations, memory-mapped IO, and compressed instructions are not implemented. Endianness is not exposed for individual byte accesses. A safety limit stops programs after 160 dynamic instructions. An infinite loop will therefore report a truncated trace.
+## Documentation and source
 
-**About CPI / IPC:** Calculated using committed dynamic instructions divided by modeled total cycles. Pipeline fill/drain overhead is included; results are pedagogical estimates. Scheduler wait counts are not equal to physical hardware stall events. The compare chart scales IPC by 10 only for display and labels it accordingly.
+- [Architecture and snapshot APIs](docs/ARCHITECTURE.md)
+- [Upgrade plan and milestone record](docs/ARCHITECTURE_UPGRADE_PLAN.md)
+- [In-order rules](docs/IN_ORDER_CPU.md)
+- [OoO ordering, predictors and recovery](docs/OUT_OF_ORDER_CPU.md)
+- [Verification](docs/VERIFICATION.md)
+- [Performance metric definitions](docs/PERFORMANCE_METRICS.md)
 
-## Next upgrades
+CPU engines are in `src/cpu/`; parser/interpreter/adapters in `src/engine/`;
+React components in `src/components/`; tests in `tests/`. Browser runtime contains
+no Node APIs. Optional browser-test scripts use Node outside the application.
 
-- Full RV32I decoder with real binary instruction words and wider memory support.
-- More faithful per-cycle pipeline registers with forwarding buses and branch-flush bubbles.
-- Genuine OoO rename map, reservation stations, precise exceptions, cache models, and speculative branches.
-- Export of traces to JSON / CSV and support for user-defined microarchitecture configuration.
-- Optional separate synthesizable SystemVerilog implementation and differential tests.
+## Roadmap and educational purpose
 
-## References
+Future extensions: binary decoding, broader ISA support, byte memory, caches,
+verified store forwarding, pipelined units, branch checkpoints, configurable
+retirement width and trace export. Each requires additional verification before
+being advertised as accurate.
 
-- Official RISC-V specifications: https://docs.riscv.org/
-- Vite guide: https://vite.dev/guide/
-- Vercel Git integration: https://vercel.com/docs/git
+Built for engineering students exploring execution, hazards, renaming,
+speculation and precise retirement. All public implementation and examples are
+independently written. No private source or artifacts are included.
+Public ISA reference: [RISC-V RV32I specification](https://docs.riscv.org/reference/isa/unpriv/rv32.html).
+MIT license; see LICENSE.
 
-## License and independence
+<details><summary>Mobile screenshot</summary>
 
-MIT License. Created as an **independent educational project**. Do not include code, traces, proprietary models, or internal technical information belonging to an employer or third party without permission.
+![RVMX mobile workspace](docs/screenshots/mobile.png)
+
+</details>
