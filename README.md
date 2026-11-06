@@ -1,3 +1,28 @@
+# RISC-V Microarchitecture Explorer
+
+An interactive educational platform for understanding
+in-order and out-of-order RISC-V CPU execution.
+
+## Live Demo
+
+[Launch RISC-V Microarchitecture Explorer](YOUR_VERCEL_URL)
+
+## Features
+
+- In-order CPU pipeline simulation
+- Out-of-order instruction execution
+- RISC-V assembly editor
+- Register and memory visualization
+- Performance comparison
+
+
+
+
+
+
+
+
+
 # RVMX — RISC-V Microarchitecture Explorer
 
 **Interactive CPU execution and performance visualization for learning in-order and out-of-order microarchitecture.**
