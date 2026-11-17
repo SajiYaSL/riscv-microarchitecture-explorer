@@ -29,7 +29,7 @@
 .panel-subtitle { font-size: var(--fs-xs); color: var(--text-3); margin: var(--sp-1) 0 0; }
 .rotated { transform: rotate(-90deg); }
 .stat { position: relative; }
-.stat .glossary-term { min-height: 24px; }
+.stat .glossary-term { min-height: var(--hit-min); }
 .metric-delta { display: block; color: var(--accent); margin-top: var(--sp-2); }
 .metric-sparkline { width: 80px; height: 32px; margin-top: var(--sp-3); }
 .error-state { padding: var(--sp-6); text-align: center; background: var(--danger-soft); color: var(--danger); }
@@ -52,7 +52,10 @@
 .timeline .instr-label > span { overflow: hidden; text-overflow: ellipsis; }
 .timeline-header .instr-label { z-index: 4; }
 .selected-instruction .instr-label { background: var(--accent-soft); }
-.timecell { display: flex; align-items: center; justify-content: center; min-height: 40px; }
+.timeline { --cell-width: var(--hit-min); }
+.timeline-row { display: grid; grid-template-columns: 200px repeat(var(--cycle-count),var(--cell-width)); width: max-content; min-width: 100%; }
+.timecell, .tick { width: var(--cell-width); min-width: var(--cell-width); }
+.timecell { display: flex; align-items: center; justify-content: center; min-height: var(--hit-min); }
 .timecell.future-phase { border: 1px dashed var(--stage-ink); }
 .timecell.empty { border: 1px solid var(--border-subtle); }
 .timeline-nav { flex-wrap: wrap; }

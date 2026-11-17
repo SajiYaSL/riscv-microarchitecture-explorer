@@ -10,7 +10,7 @@
 .icon-button { width: var(--hit-min); min-width: var(--hit-min); padding: var(--sp-2); }
 kbd { font: var(--fs-xs)/1.2 var(--font-ui); padding: var(--sp-1) var(--sp-1); border: 1px solid var(--border-subtle); border-radius: var(--sp-1); color: var(--text-3); white-space: nowrap; }
 .segmented-control { display: inline-flex; gap: var(--sp-1); padding: var(--sp-1); background: var(--bg-0); border: 1px solid var(--border-subtle); border-radius: var(--r-md); white-space: nowrap; }
-.segmented-control button { min-height: 32px; border: 1px solid transparent; border-radius: var(--r-sm); padding: var(--sp-1) var(--sp-3); font-size: var(--fs-xs); background: transparent; color: var(--text-3); }
+.segmented-control button { min-height: var(--hit-min); border: 1px solid transparent; border-radius: var(--r-sm); padding: var(--sp-1) var(--sp-3); font-size: var(--fs-xs); background: transparent; color: var(--text-3); }
 .segmented-control [aria-checked=true] { background: var(--bg-3); color: var(--text-1); border-color: var(--border); box-shadow: var(--shadow-1); }
 .tab-list { display: flex; overflow: auto; gap: var(--sp-4); padding: 0 var(--sp-5); border-bottom: 1px solid var(--border-subtle); scrollbar-width: none; }
 .tab-list > button { display: flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; min-height: 54px; padding: var(--sp-3) 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: var(--fs-sm); color: var(--text-3); }
@@ -142,7 +142,7 @@ kbd { font: var(--fs-xs)/1.2 var(--font-ui); padding: var(--sp-1) var(--sp-1); b
 @media (max-width:1179px) and (min-width:760px) { .execution-bar { padding-inline: var(--sp-5); } .execution-top { gap: var(--sp-3); } .play-button kbd, .execution-options .speed-select { display: none; } .play-button { min-width: 80px; } }
 @media (max-width:999px) and (min-width:760px) { .execution-top .finish-button, .execution-top .clock-counter { display: none; } }
 @media (max-width:759px) {
-  .segmented-control button { min-height: 40px; }
+  .segmented-control button { min-height: var(--hit-min); }
   .mobile-mode-switch { display: flex !important; padding: var(--sp-4) var(--sp-4) 0; }
   .mobile-mode-switch .segmented-control { width: 100%; }
   .mobile-mode-switch .segmented-control button { flex: 1; }

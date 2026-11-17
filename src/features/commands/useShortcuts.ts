@@ -11,9 +11,11 @@ export function useShortcuts(route: Route) {
   const model = useSimulation(); const {experience} = useSettings();
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {event.preventDefault(); if (!document.querySelector('dialog[open]') || uiStore.get().dialog === 'commands') uiStore.set({dialog: uiStore.get().dialog === 'commands' ? null : 'commands'}); return;}
       if (event.key === 'Escape' && uiStore.get().tourStep >= 0) {uiStore.set({tourStep: -1}); return;}
       if (event.ctrlKey || event.metaKey || event.altKey || isEditable(event.target) || document.querySelector('dialog[open]')) return;
+      if (event.key === ' ' && event.target instanceof Element && event.target.closest('button,a,summary,[role=radio],[role=tab]')) return;
       const action = shortcutAction(event.key); if (!action) return;
       if (action === 'help') {event.preventDefault(); uiStore.set({dialog: 'help'}); return;}
       if (!['explorer', 'performance'].includes(route.view)) return;

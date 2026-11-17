@@ -49,3 +49,10 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Added a plain-language cycle summary with immediate manual-step announcements and throttled announcements during playback.
 - Stabilized visualization detail and summary heights while stepping. All motion follows reduced-motion preferences.
 - Validation: production build; 90 unit tests; desktop/mobile browser captures without runtime errors or page overflow.
+
+## Phase 7 — Accessibility
+
+- Fixed transient theme-switch contrast, isolated scrollable desktop content from the playback bar, and completed the diagram text alternative.
+- Added explicit modal focus wrapping, correct native Space behavior, independent tab/radio arrow handling, an equivalent full-size source-line inspection action, and error association.
+- Added keyboard/drag-operated inspector sheet snap sizes. Glossary popovers remain inside their owning modal.
+- Validation: production build; 90 unit tests; axe scans of 25 UI states across three themes with zero violations; manual browser automation for focus containment/return, keyboard controls, reduced motion, 200% equivalent layout, sheet gestures, and source inspection; desktop/mobile captures.

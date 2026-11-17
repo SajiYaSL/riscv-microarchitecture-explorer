@@ -24,6 +24,7 @@ button svg { width: 18px; height: 18px; stroke-width: 1.75; }
 .inspector-note { padding: var(--sp-3) var(--sp-5); line-height: 1.7; }
 .skip-link { position: fixed; top: -100px; left: var(--sp-4); z-index: 100; background: var(--accent); color: var(--accent-contrast); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); }
 .skip-link:focus { top: var(--sp-4); }
+.theme-switching *, .theme-switching *::before, .theme-switching *::after { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

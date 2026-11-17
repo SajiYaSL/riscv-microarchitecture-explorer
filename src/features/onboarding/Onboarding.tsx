@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect, type KeyboardEvent as ReactKeyboardEvent} from 'react';
 import {ArrowLeft, ArrowRight, BookOpen, Cpu, GraduationCap, Sparkles, Terminal, X} from 'lucide-react';
 import {Dialog} from '../../components/ui/Dialog';
 import {Button} from '../../components/ui/Button';
@@ -16,11 +16,17 @@ const steps = [
 ];
 export function Onboarding({route}: {route: Route}) {
   const {welcomed, experience} = useSettings(); const {tourStep} = useUI();
+  const experienceKey = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 'guided' : event.key === 'End' ? 'expert' : experience === 'guided' ? 'expert' : 'guided';
+    settingsStore.set({experience: next}); document.getElementById(`welcome-${next}`)?.focus();
+  };
   useEffect(() => {
     document.documentElement.dataset.experience = experience;
   }, [experience]);
   const start = (paste = false) => {settingsStore.set({welcomed: true}); navigate('/explorer'); if (paste) {simulationActions.editCode(''); requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>('textarea')?.focus());}};
-  return <><Dialog open={!welcomed && !route.share} onClose={() => start()} title="Meet your machine." className="welcome-dialog"><div className="welcome-illustration" aria-hidden="true"><span><Terminal size={24}/></span><i/><span className="welcome-cpu"><Cpu size={38}/></span><i/><span><Sparkles size={24}/></span></div><span className="welcome-kicker">RVMX · Your architecture lab</span><h2>Inside the machine.<br/><span>In your hands.</span></h2><p>Turn a few lines of code into an understanding of how a processor works. Make this workspace yours.</p><div className="welcome-choices" role="radiogroup" aria-label="Choose your experience"><button role="radio" aria-checked={experience === 'guided'} onClick={() => settingsStore.set({experience: 'guided'})}><GraduationCap size={22}/><strong>I’m learning</strong><span>Helpful explanations and a guided path.</span></button><button role="radio" aria-checked={experience === 'expert'} onClick={() => settingsStore.set({experience: 'expert'})}><Cpu size={22}/><strong>I’m experienced</strong><span>More tools, compact views, fewer hints.</span></button></div><Button variant="primary" size="lg" onClick={() => start()}>Start exploring<ArrowRight/></Button><Button variant="ghost" onClick={() => start(true)}>Paste my own code</Button><p className="welcome-privacy">Your experiments stay in this browser. No account needed.</p></Dialog>{tourStep >= 0 && <ProductTour/>}</>;
+  return <><Dialog open={!welcomed && !route.share} onClose={() => start()} title="Meet your machine." className="welcome-dialog"><div className="welcome-illustration" aria-hidden="true"><span><Terminal size={24}/></span><i/><span className="welcome-cpu"><Cpu size={38}/></span><i/><span><Sparkles size={24}/></span></div><span className="welcome-kicker">RVMX · Your architecture lab</span><h2>Inside the machine.<br/><span>In your hands.</span></h2><p>Turn a few lines of code into an understanding of how a processor works. Make this workspace yours.</p><div className="welcome-choices" role="radiogroup" aria-label="Choose your experience"><button id="welcome-guided" role="radio" tabIndex={experience === 'guided' ? 0 : -1} onKeyDown={experienceKey} aria-checked={experience === 'guided'} onClick={() => settingsStore.set({experience: 'guided'})}><GraduationCap size={22}/><strong>I’m learning</strong><span>Helpful explanations and a guided path.</span></button><button id="welcome-expert" role="radio" tabIndex={experience === 'expert' ? 0 : -1} onKeyDown={experienceKey} aria-checked={experience === 'expert'} onClick={() => settingsStore.set({experience: 'expert'})}><Cpu size={22}/><strong>I’m experienced</strong><span>More tools, compact views, fewer hints.</span></button></div><Button variant="primary" size="lg" onClick={() => start()}>Start exploring<ArrowRight/></Button><Button variant="ghost" onClick={() => start(true)}>Paste my own code</Button><p className="welcome-privacy">Your experiments stay in this browser. No account needed.</p></Dialog>{tourStep >= 0 && <ProductTour/>}</>;
 }
 function ProductTour() {
   const {tourStep} = useUI(); const step = steps[Math.min(tourStep, steps.length - 1)];

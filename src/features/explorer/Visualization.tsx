@@ -12,6 +12,7 @@ import {availableTabs} from './visualizationTabs';
 import {TraceView} from './TraceView';
 import {StatusPill} from '../../components/ui/StatusPill';
 import {CycleSummary} from './CycleSummary';
+import {ProcessorTextView} from './ProcessorTextView';
 const Performance = lazy(() => import('../../components/architecture/Performance'));
 const labels: Record<VisualizationTab, string> = {datapath: 'Datapath', timeline: 'Timeline', rob: 'Reorder buffer', rename: 'Rename', scheduling: 'Scheduling', memory: 'Memory queue', performance: 'Performance', trace: 'Trace'};
 export function Visualization() {
@@ -21,7 +22,7 @@ export function Visualization() {
   const current = available.includes(tab) ? tab : 'datapath';
   const render = (view: VisualizationTab) => {
     switch (view) {
-      case 'datapath': return <div className="datapath-view" data-fit={fit}><div className="diagram-toolbar"><span><ArrowLeftRight size={14}/>{fit ? 'Fit to your workspace' : 'Scroll to explore the whole datapath'}</span><div><Button variant="ghost" aria-pressed={textView} onClick={() => setTextView(!textView)}><Table2/>Text view</Button><Button variant="ghost" aria-pressed={fit} onClick={() => setFit(!fit)}><Expand/>{fit ? 'Actual size' : 'Fit'}</Button></div></div>{textView ? <div className="table-wrap"><table><caption className="sr-only">Current processor state</caption><thead><tr><th>Stage / component</th><th>Instructions</th></tr></thead><tbody>{model.pipeline ? Object.entries(model.pipeline.stages).map(([stage, entry]) => <tr key={stage}><td>{stage}</td><td>{entry ? <button className="text-button" onClick={() => selectInstruction(entry.id)}>I{entry.id + 1} · {entry.ins.text}</button> : 'Bubble — no instruction'}</td></tr>) : [['Fetch', model.ooo?.fetchQueue.length ?? 0], ['Decode', model.ooo?.decodeQueue.length ?? 0], ['Reorder buffer', model.ooo?.rob.length ?? 0], ['Retired', model.state.retired]].map(([name, count]) => <tr key={name}><td>{name}</td><td>{count}</td></tr>)}</tbody></table></div> : model.pipeline ? <InorderDiagram s={model.pipeline} onSelect={selectInstruction}/> : model.ooo ? <OooDiagram s={model.ooo} config={model.config} onSelect={selectInstruction}/> : null}</div>;
+      case 'datapath': return <div className="datapath-view" data-fit={fit}><div className="diagram-toolbar"><span><ArrowLeftRight size={14}/>{fit ? 'Fit to your workspace' : 'Scroll to explore the whole datapath'}</span><div><Button variant="ghost" aria-pressed={textView} onClick={() => setTextView(!textView)}><Table2/>Text view</Button><Button variant="ghost" aria-pressed={fit} onClick={() => setFit(!fit)}><Expand/>{fit ? 'Actual size' : 'Fit'}</Button></div></div>{textView ? <ProcessorTextView/> : model.pipeline ? <InorderDiagram s={model.pipeline} onSelect={selectInstruction}/> : model.ooo ? <OooDiagram s={model.ooo} config={model.config} onSelect={selectInstruction}/> : null}</div>;
       case 'timeline': return <Timeline sim={model.sim} cycle={model.current} selected={selected} onSelect={selectInstruction}/>;
       case 'rob': return model.ooo ? <RobViewer s={model.ooo} onSelect={selectInstruction}/> : null;
       case 'rename': return model.ooo ? <RenameViewer s={model.ooo}/> : null;
