@@ -1,0 +1,2 @@
+.mode-tabs, .mini-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.mode-tabs .active, .mini-tabs [aria-pressed=true] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }

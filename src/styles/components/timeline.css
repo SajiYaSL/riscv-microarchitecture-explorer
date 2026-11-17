@@ -1,0 +1,27 @@
+.timeline-nav { display: flex; align-items: center; gap: var(--sp-2); }
+.timeline-scroll { overflow: auto; padding: var(--sp-4); }
+.timeline { font: var(--fs-xs)/1.5 var(--font-mono); }
+.timeline-row { display: flex; align-items: center; gap: var(--sp-1); min-height: 44px; margin-bottom: var(--sp-1); }
+.instr-label { flex: 0 0 180px; width: 180px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; color: var(--text-2); font-size: var(--fs-xs); }
+.header-label { color: var(--text-3); }
+.tick, .timecell { flex: 1; min-width: 40px; text-align: center; border-radius: var(--r-sm); }
+.tick { color: var(--text-3); }
+.current-tick { background: var(--accent-soft); color: var(--accent); }
+.timecell { min-height: var(--hit-min); border: 0; padding: var(--sp-1); color: var(--stage-ink); background: var(--bg-3); font: var(--fs-xs) var(--font-mono); }
+.phase-fetch { background: var(--stage-fetch); }
+.phase-decode { background: var(--stage-decode); }
+.phase-rename { background: var(--stage-rename); }
+.phase-dispatch { background: var(--stage-dispatch); }
+.phase-issue, .phase-stall { background: var(--stage-issue); }
+.phase-execute { background: var(--stage-exec); }
+.phase-memory { background: var(--stage-memory); }
+.phase-writeback { background: var(--stage-writeback); }
+.phase-retire { background: var(--stage-retire); }
+.phase-squash, .phase-fault { background: var(--stage-squash); }
+.phase-rob { background: var(--stage-rob); }
+.timecell.empty { background: var(--bg-2); }
+.playhead { outline: 2px solid var(--accent); outline-offset: -2px; }
+.selected-instruction { background: var(--accent-soft); border-radius: var(--r-sm); }
+.lifecycle-inspection { padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--border-subtle); color: var(--text-2); font-size: var(--fs-sm); }
+.lifecycle-inspection strong { display: block; color: var(--accent); }
+.lifecycle-inspection p { margin: var(--sp-2) 0; }

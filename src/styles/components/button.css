@@ -1,0 +1,8 @@
+button { min-height: var(--hit-min); }
+.run-btn, .secondary-button, .mode-tabs button, .mini-tabs button, .timeline-nav button, .cycle-controls button { display: inline-flex; justify-content: center; align-items: center; gap: var(--sp-2); min-height: var(--hit-min); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); background: var(--bg-3); color: var(--text-2); font-size: var(--fs-sm); font-weight: 500; white-space: nowrap; }
+.run-btn, .cycle-controls .play-button { background: var(--accent); color: var(--accent-contrast); border-color: transparent; font-weight: 650; }
+.run-btn:hover, .cycle-controls .play-button:hover { background: var(--accent-hover); }
+.secondary-button:hover, .cycle-controls button:hover:not(:disabled) { border-color: var(--border-strong); }
+.text-button { min-height: var(--hit-min); border: 0; background: none; color: inherit; text-align: left; font: inherit; padding: var(--sp-1); }
+.text-button:hover { color: var(--accent); }
+@media (pointer:coarse) { :root { --hit-min: 44px; } }

@@ -12,15 +12,15 @@ export function OooDiagram({s,config,onSelect}:{s:OooSnapshot;config:CPUConfig;o
   component==='Rename'||component==='Dispatch'?s.rob.filter(e=>e.status==='renamed'||e.status==='waiting'):s.rob;
  return <Panel title="Out-of-order datapath" detail={<span className={s.recovery?'pill bad':'pill green'}>{s.recovery?'RECOVERING':'LIVE STATE'}</span>}>
   <div className="diagram-scroll"><svg viewBox="0 0 1120 220" className="architecture-diagram" role="img" aria-label="Interactive out-of-order processor architecture">
-   <defs><marker id="arrow-ooo" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#5b7697"/></marker></defs>
+   <defs><marker id="arrow-ooo" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="var(--border-strong)"/></marker></defs>
    {components.map((name,i)=>{const x=12+i*139;return <g key={name} tabIndex={0} role="button" aria-label={`Inspect ${name}`} onClick={()=>setComponent(name)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setComponent(name);}}}>
-    {i<7&&<path d={`M${x+121},85 H${x+138}`} stroke="#5b7697" markerEnd="url(#arrow-ooo)"/>}
-    <rect x={x} y={30} width={121} height={110} rx={10} fill={component===name?'#153e47':'#14263c'} stroke={component===name?'#4de1ca':'#36506c'}/>
-    <text x={x+60} y={57} textAnchor="middle" fill="#a1b2ca" fontSize={11}>{name}</text><text x={x+60} y={96} textAnchor="middle" fill="#6ce8cf" fontSize={25}>{counts[i]}</text>
-    <text x={x+60} y={122} textAnchor="middle" fill="#8199b6" fontSize={9}>{i===6?`capacity ${config.robSize}`:i===4?`capacity ${config.issueCapacity}`:i===7?'committed':'instructions'}</text>
+    {i<7&&<path d={`M${x+121},85 H${x+138}`} stroke="var(--border-strong)" markerEnd="url(#arrow-ooo)"/>}
+    <rect x={x} y={30} width={121} height={110} rx={10} fill={component===name?'var(--accent-soft)':'var(--bg-2)'} stroke={component===name?'var(--accent)':'var(--border)'}/>
+    <text x={x+60} y={57} textAnchor="middle" fill="var(--text-2)" fontSize={13}>{name}</text><text x={x+60} y={96} textAnchor="middle" fill="var(--accent)" fontSize={25}>{counts[i]}</text>
+    <text x={x+60} y={122} textAnchor="middle" fill="var(--text-3)" fontSize={13}>{i===6?`capacity ${config.robSize}`:i===4?`capacity ${config.issueCapacity}`:i===7?'committed':'instructions'}</text>
    </g>;})}
-   <path d="M900,150 V184 H350 V150" stroke={s.recovery?'#f7a0b5':'#40536b'} fill="none" strokeDasharray="5 4" markerEnd="url(#arrow-ooo)"/>
-   <text x="620" y="207" fill={s.recovery?'#f7a0b5':'#91a3bb'} textAnchor="middle" fontSize="11">{s.recovery?'Branch recovery: restore mappings and discard younger work':'ROB preserves age · PRF tags wake dependent instructions'}</text>
+   <path d="M900,150 V184 H350 V150" stroke={s.recovery?'var(--danger)':'var(--border)'} fill="none" strokeDasharray="5 4" markerEnd="url(#arrow-ooo)"/>
+   <text x="620" y="207" fill={s.recovery?'var(--danger)':'var(--text-3)'} textAnchor="middle" fontSize="13">{s.recovery?'Branch recovery: restore mappings and discard younger work':'ROB preserves age · PRF tags wake dependent instructions'}</text>
   </svg></div>
   <div className="component-inspector"><b>{component}</b><p className="muted-text">Fetch PC {hex(s.fetchPC)} · Committed PC {hex(s.pc)} · {s.freeList.length} free physical registers</p><span className="muted-text">Click a component, then an instruction to inspect its lifecycle.</span><div className="inspection-items">{contents.map(e=><button key={e.id} onClick={()=>onSelect(e.id)}>I{e.id+1} · {e.ins.text}</button>)}{!contents.length&&<span className="muted-text">Empty this clock</span>}</div></div>
  </Panel>;

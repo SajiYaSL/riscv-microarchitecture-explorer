@@ -1,0 +1,2 @@
+[data-tooltip] { position: relative; }
+[data-tooltip]:hover::after, [data-tooltip]:focus-visible::after { content: attr(data-tooltip); position: absolute; left: 50%; bottom: calc(100% + var(--sp-2)); transform: translateX(-50%); background: var(--text-1); color: var(--bg-0); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); font-size: var(--fs-xs); white-space: nowrap; z-index: var(--z-toast); pointer-events: none; }

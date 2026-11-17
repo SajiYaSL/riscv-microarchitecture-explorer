@@ -1,0 +1,21 @@
+.diagram-scroll { overflow: auto; padding: var(--sp-4); background: radial-gradient(ellipse at 50% 30%,var(--accent-soft),transparent 70%); }
+.architecture-diagram { display: block; width: 100%; min-width: 900px; min-height: 220px; }
+.architecture-diagram [role=button] { cursor: pointer; }
+.architecture-diagram [role=button]:hover rect { stroke: var(--accent); }
+.architecture-diagram rect { transition: fill var(--dur-fast) var(--ease), stroke var(--dur-fast) var(--ease); }
+.component-inspector { border-top: 1px solid var(--border-subtle); padding: var(--sp-4) var(--sp-5); color: var(--text-2); font-size: var(--fs-sm); }
+.component-inspector > b { display: block; color: var(--accent); margin-bottom: var(--sp-2); }
+.component-inspector p { margin: var(--sp-2) 0; }
+.inspection-items { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+.inspection-items button { min-height: var(--hit-min); padding: var(--sp-2) var(--sp-3); background: var(--bg-3); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text-2); font: var(--fs-xs) var(--font-mono); }
+.latch-details { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--sp-4); margin: var(--sp-4) 0; }
+.latch-details span { display: flex; flex-direction: column; gap: var(--sp-1); color: var(--text-3); font-size: var(--fs-xs); }
+.latch-details b { color: var(--text-1); font-family: var(--font-mono); }
+.event-stream { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-4); max-height: 260px; overflow: auto; }
+.clock-event { display: flex; align-items: flex-start; gap: var(--sp-3); background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text-2); padding: var(--sp-3); font-size: var(--fs-sm); text-align: left; }
+.clock-event:disabled { opacity: 1; cursor: default; }
+.event-stall, .event-flush, .event-recovery { border-color: var(--warning); }
+.event-retire { border-color: var(--success); }
+.plot { height: 280px; padding: var(--sp-4) var(--sp-2); }
+.plot text { font-size: var(--fs-xs); }
+@media (max-width:760px) { .latch-details { grid-template-columns: 1fr 1fr; } }
