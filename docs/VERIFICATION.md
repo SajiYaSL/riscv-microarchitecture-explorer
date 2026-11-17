@@ -5,16 +5,18 @@
 ```bash
 npm test
 npm run build
-npm run test:browser   # optional: Node 22+ and Google Chrome / CHROME_BIN required
+npx playwright install chromium
+npm run test:browser
+npm run check:ui
+npm run check:bundle   # after the production build
 ```
 
 The regular unit suite does not require a browser, network or backend. The
-production build includes strict TypeScript compilation. The browser runner
-starts a local Vite server and headless Chrome with an isolated temporary profile,
-uses DevTools through Node's built-in WebSocket client, writes public screenshots,
-and stops its child processes. It uses localhost ports 5175 and 9224; choose an
-environment where those are available. Chrome runs with `--no-sandbox` for
-container compatibility and does not use a personal profile or credentials.
+production build includes strict TypeScript compilation. Playwright starts a
+local Vite server on port 5176 and uses isolated browser contexts. Matching
+Chromium is used for CI and visual baselines; a custom `CHROME_BIN` is also supported
+for workflow/accessibility checks.
+The runner stops its server and does not use a personal profile or credentials.
 
 ## Independent differential execution
 
@@ -59,21 +61,27 @@ that the previously loaded program is still active.
 
 ## UI and real browser
 
-The smoke script exercises all eleven examples, independent comparison,
-interactive SVG components, physical/RAT tabs, both CPU diagrams, cycle stepping,
-backward/forward replay, invalid configuration and reset, fatal fault display,
-mobile horizontal-overflow bounds and learning content. Uncaught browser
-exceptions fail the run. Screenshots are saved to `docs/screenshots/`.
+The Playwright suite exercises all eleven examples, independent comparison,
+configuration validation, precise fault display, stepping/replay, reload
+persistence, share links, blocked storage, learning/progress, exports, pinned
+runs, keyboard behavior, and mobile menus/sheets.
+
+Axe scans cover three themes and all main views, lesson/glossary routes, active
+visualizations, and dialogs. Eight visual baselines cover dark/light Explorer
+layouts at 360, 768, 1280, and 1440px, with additional breakpoint checks from
+320px to 1440px. Baselines live in `tests/e2e/__screenshots__/`; public docs
+screenshots are captured with `npm run capture:docs -- <local-preview-url>`.
 
 ## Current result
 
-- `npm install`: successful; existing esbuild install-script approval notices
-  may appear in managed environments.
-- `npm test`: **79 passed**, five files, zero failures.
+- `npm test`: **91 passed**, seven files, including the original 79 engine tests.
 - `npm run build`: successful strict TypeScript and static Vite build.
 - Charts are dynamically split from the initial application bundle.
-- Chrome smoke checks: successful for all eleven examples, both CPU views,
-  configuration, fault/comparison behavior and desktop/mobile layouts.
+- `npm run test:browser`: **38 passed**, including all eleven examples, UI
+  workflows, accessibility scans, and visual baselines.
+- `npm run check:ui` and `npm run check:bundle`: successful.
+- Local desktop production Lighthouse: **100 / 100 / 100** for Performance,
+  Accessibility, and Best Practices; see [quality report](QUALITY_REPORT.md).
 - Public desktop and mobile screenshots captured and visually reviewed.
 - `git diff --check`: successful; source/docs checked for private paths and
   obvious credential markers. No private code, configuration or traces used.

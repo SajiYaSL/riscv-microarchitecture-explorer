@@ -1,23 +1,29 @@
-import {AreaChart,Area,BarChart,Bar,XAxis,YAxis,Tooltip,CartesianGrid,ResponsiveContainer,Legend} from 'recharts';
+import {useId, useMemo, useRef, useState, type ReactNode} from 'react';
+import {AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, CartesianGrid, ResponsiveContainer, Legend} from 'recharts';
+import {Download, Table2} from 'lucide-react';
 import type {Simulation} from '../../engine/simulator';
-import {unitFor,type Unit} from '../../cpu/ooo/engine';
+import type {Unit} from '../../cpu/ooo/engine';
+import {utilization} from '../../features/performance/metrics';
+export {utilization} from '../../features/performance/metrics';
 import {Panel} from './shared';
-const units:Unit[]=['ALU','MUL','MEM','BR'];
-export function utilization(sim:Simulation,cycle:number):Record<Unit,number>{
- if(sim.oooSnapshots)return sim.oooSnapshots[Math.min(cycle,sim.totalCycles)].unitBusy;
- const result={ALU:0,MUL:0,MEM:0,BR:0};
- for(const s of sim.snapshots?.slice(0,cycle+1)??[]){
-  const e=s.stages.EX;if(e&&unitFor(e.ins)!=='MEM')result[unitFor(e.ins)]++;
-  if(s.stages.MEM&&unitFor(s.stages.MEM.ins)==='MEM')result.MEM++;
- }
- return result;
+import {Button} from '../ui/Button';
+import {exportSVGImage} from '../../features/experiments/export';
+import {notify} from '../../state/uiStore';
+const units: Unit[] = ['ALU', 'MUL', 'MEM', 'BR'];
+type Datum = Record<string, number | string>;
+function ChartPanel({title, summary, data, columns, children, name}: {title: string; summary: string; data: Datum[]; columns: {key: string; label: string}[]; children: ReactNode; name: string}) {
+  const [table, setTable] = useState(false), [page, setPage] = useState(0); const ref = useRef<HTMLDivElement>(null); const id = useId();
+  const pages = Math.max(1, Math.ceil(data.length / 20)), safePage = Math.min(page, pages - 1);
+  const image = (format: 'svg' | 'png') => {const svg = ref.current?.querySelector<SVGSVGElement>('.recharts-surface'); if (svg) void exportSVGImage(svg, name, format).catch(error => notify((error as Error).message));};
+  return <Panel title={title} detail={<Button variant="ghost" aria-pressed={table} onClick={() => setTable(!table)}><Table2/>{table ? 'View chart' : 'View as table'}</Button>}><p id={id} className="chart-summary">{summary}</p>{table ? <><div className="table-wrap"><table aria-describedby={id}><caption className="sr-only">{title} data</caption><thead><tr>{columns.map(column => <th scope="col" key={column.key}>{column.label}</th>)}</tr></thead><tbody>{data.slice(safePage * 20, (safePage + 1) * 20).map((row, index) => <tr key={index}>{columns.map(column => <td key={column.key}>{row[column.key]}</td>)}</tr>)}</tbody></table></div>{pages > 1 && <div className="table-pagination"><Button variant="ghost" disabled={!safePage} onClick={() => setPage(safePage - 1)}>Previous data</Button><span>{safePage + 1} / {pages}</span><Button variant="ghost" disabled={safePage === pages - 1} onClick={() => setPage(safePage + 1)}>Next data</Button></div>}</> : <div className="plot" ref={ref} role="group" aria-label={title} aria-describedby={id}>{children}</div>}<div className="chart-footer"><span>Actual snapshot data</span><div><Button variant="ghost" size="sm" disabled={table} aria-label={`Export ${title} as SVG`} onClick={() => image('svg')}><Download/>SVG</Button><Button variant="ghost" size="sm" disabled={table} aria-label={`Export ${title} as PNG`} onClick={() => image('png')}>PNG</Button></div></div></Panel>;
 }
-const tooltipStyle={background:'#152237',border:'1px solid #3b526d',borderRadius:8,color:'#d9e7fa'};
-export default function Performance({sim,cycle}:{sim:Simulation;cycle:number}){
- const history=sim.oooSnapshots;
- const data=history?history.slice(0,cycle+1).filter((_,i)=>i%Math.max(1,Math.floor(cycle/150))===0||i===cycle).map(s=>({cycle:s.cycle,ROB:s.rob.length,IQ:s.rob.filter(e=>e.status==='waiting').length})):
-  (sim.snapshots??[]).slice(0,cycle+1).map(s=>({cycle:s.cycle,Occupied:Object.values(s.stages).filter(Boolean).length}));
- const busy=utilization(sim,cycle);
- return <div className="compare-panels"><Panel title={history?'Queue occupancy':'Pipeline occupancy'} detail="Actual snapshot samples"><div className="plot"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data}><CartesianGrid stroke="#27374e" strokeDasharray="3 4"/><XAxis dataKey="cycle" stroke="#869db6"/><YAxis allowDecimals={false} stroke="#869db6"/><Tooltip contentStyle={tooltipStyle}/><Legend/>{(history?['ROB','IQ']:['Occupied']).map((key,i)=><Area key={key} dataKey={key} stroke={i?'#a292f4':'#48d6c0'} fill={i?'#7464a6':'#26786e'} fillOpacity={0.25} isAnimationActive={false}/>)}</AreaChart></ResponsiveContainer></div></Panel>
- <Panel title="Execution-unit occupancy" detail="Busy clocks / elapsed clocks"><div className="plot"><ResponsiveContainer width="100%" height="100%"><BarChart data={units.map(unit=>({unit,Busy:cycle?Number((100*busy[unit]/cycle).toFixed(1)):0}))}><CartesianGrid stroke="#27374e" strokeDasharray="3 4"/><XAxis dataKey="unit" stroke="#869db6"/><YAxis domain={[0,100]} unit="%" stroke="#869db6"/><Tooltip contentStyle={tooltipStyle}/><Bar dataKey="Busy" unit="%" fill="#4acfb9" radius={[4,4,0,0]} isAnimationActive={false}/></BarChart></ResponsiveContainer></div><div className="inspector-note">In-order: EX occupancy (memory uses MEM). OoO: execution clocks after selection. These stage definitions differ.</div></Panel></div>;
+const tooltipStyle = {background: 'var(--bg-2)', border: '1px solid var(--border-strong)', borderRadius: 'var(--r-sm)', color: 'var(--text-1)', fontSize: 13};
+const tick = {fill: 'var(--text-3)', fontSize: 12};
+export default function Performance({sim, cycle}: {sim: Simulation; cycle: number}) {
+  const history = sim.oooSnapshots; const stride = Math.max(1, Math.ceil(cycle / 150));
+  const data = useMemo<Datum[]>(() => history ? history.slice(0, cycle + 1).filter((_, index) => index % stride === 0 || index === cycle).map(s => ({cycle: s.cycle, ROB: s.rob.length, IQ: s.rob.filter(entry => entry.status === 'waiting').length})) : (sim.snapshots ?? []).slice(0, cycle + 1).filter((_, index) => index % stride === 0 || index === cycle).map(s => ({cycle: s.cycle, Occupied: Object.values(s.stages).filter(Boolean).length})), [history, sim.snapshots, cycle, stride]);
+  const busy = useMemo(() => utilization(sim, cycle), [sim, cycle]);
+  const unitData = units.map(unit => ({unit, Busy: cycle ? Number((100 * busy[unit] / cycle).toFixed(1)) : 0, Clocks: busy[unit]}));
+  const occupancyTitle = history ? 'Queue occupancy' : 'Pipeline occupancy';
+  return <div className="compare-panels performance-charts"><ChartPanel title={occupancyTitle} name="rvmx-occupancy" summary={`${history ? 'Instructions in the reorder buffer and waiting issue queue' : 'Occupied pipeline stages'} through cycle ${cycle}. ${stride > 1 ? `Sampled every ${stride} clocks, including the final snapshot.` : 'One sample per clock.'}`} data={data} columns={history ? [{key: 'cycle', label: 'Cycle'}, {key: 'ROB', label: 'Reorder buffer'}, {key: 'IQ', label: 'Waiting issue queue'}] : [{key: 'cycle', label: 'Cycle'}, {key: 'Occupied', label: 'Occupied stages'}]}><ResponsiveContainer width="100%" height="100%"><AreaChart data={data} accessibilityLayer margin={{top: 8, right: 12, left: 0, bottom: 14}}><CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 4"/><XAxis dataKey="cycle" stroke="var(--text-3)" tick={tick} label={{value: 'Clock cycle', position: 'insideBottom', offset: -10, fill: 'var(--text-3)', fontSize: 12}} height={40}/><YAxis allowDecimals={false} stroke="var(--text-3)" tick={tick} width={35}/><ChartTooltip contentStyle={tooltipStyle} labelFormatter={label => `Cycle ${label}`}/><Legend formatter={value => <span className="chart-legend-label">{value === 'ROB' ? 'Reorder buffer' : value === 'IQ' ? 'Issue queue' : 'Occupied stages'}</span>}/>{(history ? ['ROB', 'IQ'] : ['Occupied']).map((key, index) => <Area key={key} dataKey={key} stroke={index ? 'var(--stage-issue)' : 'var(--stage-rob)'} fill={index ? 'var(--stage-issue)' : 'var(--stage-rob)'} strokeWidth={2} fillOpacity={.14} isAnimationActive={false}/>)}</AreaChart></ResponsiveContainer></ChartPanel><ChartPanel title="Execution-unit occupancy" name="rvmx-execution-units" summary={`Busy clocks divided by ${cycle} elapsed clocks. ${history ? 'Out-of-order counts execution clocks after selection.' : 'In-order counts EX occupancy, with memory operations in MEM.'}`} data={unitData} columns={[{key: 'unit', label: 'Unit'}, {key: 'Busy', label: 'Busy (%)'}, {key: 'Clocks', label: 'Busy clocks'}]}><ResponsiveContainer width="100%" height="100%"><BarChart data={unitData} accessibilityLayer margin={{top: 8, right: 12, left: 0, bottom: 14}}><CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 4"/><XAxis dataKey="unit" stroke="var(--text-3)" tick={tick} label={{value: 'Execution unit', position: 'insideBottom', offset: -10, fill: 'var(--text-3)', fontSize: 12}} height={40}/><YAxis domain={[0, 100]} unit="%" stroke="var(--text-3)" tick={tick} width={45}/><ChartTooltip contentStyle={tooltipStyle}/><Bar dataKey="Busy" name="Busy" unit="%" fill="var(--stage-rob)" radius={[4, 4, 0, 0]} isAnimationActive={false}/></BarChart></ResponsiveContainer></ChartPanel></div>;
 }

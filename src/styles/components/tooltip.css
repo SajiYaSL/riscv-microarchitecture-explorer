@@ -1,0 +1,5 @@
+.glossary-term { min-height: var(--hit-min); min-width: var(--hit-min); display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0; background: none; color: inherit; text-decoration: underline dotted; text-underline-offset: 4px; font: inherit; cursor: help; }
+.tooltip-popover { position: fixed; width: 280px; padding: var(--sp-4); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--shadow-2); background: var(--bg-2); color: var(--text-1); z-index: 80; font-size: var(--fs-sm); }
+.tooltip-popover strong { font-weight: 550; }
+.tooltip-popover p { margin: var(--sp-2) 0; font-size: var(--fs-xs); color: var(--text-2); }
+.tooltip-popover a { display: inline-flex; align-items: center; min-height: 40px; font-size: var(--fs-xs); }

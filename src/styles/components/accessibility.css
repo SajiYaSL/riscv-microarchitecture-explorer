@@ -1,0 +1,23 @@
+.sheet-handle { display: flex; justify-content: center; align-items: center; width: 100%; height: 44px; padding: var(--sp-3); background: none; border: 0; touch-action: none; cursor: ns-resize; }
+.sheet-handle > span { width: 40px; height: 4px; border-radius: var(--r-sm); background: var(--border-strong); }
+.modal-sheet::before { display: none; }
+.modal-sheet[data-snap=half] { max-height: 55dvh; }
+.modal-sheet[data-snap=full] { max-height: 85dvh; }
+.modal-sheet .modal-header { position: sticky; top: 0; background: var(--bg-1); z-index: 1; }
+.program-footer-actions { display: flex; align-items: center; gap: var(--sp-2); }
+.inspect-line-action { font-size: var(--fs-xs); padding-inline: var(--sp-2); }
+.table-wrap:focus-visible,  .diagram-scroll:focus-visible { outline-offset: -3px; }
+.processor-text-view { max-height: 600px; }
+.processor-text-view caption { padding: var(--sp-4); text-align: left; color: var(--text-3); font-size: var(--fs-sm); }
+.text-view-instructions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+@media (min-width:760px) {
+  .app-shell { height: 100dvh; overflow: clip; }
+  .main { height: 100dvh; overflow: clip; display: flex; flex-direction: column; }
+  .topbar,  .execution-bar { flex-shrink: 0; }
+  .execution-bar { position: relative; }
+  .page { position: relative; flex: 1; min-height: 0; max-width: none; width: 100%; margin: 0; overflow: auto; scroll-padding-top: var(--sp-5); }
+  .page-inner { max-width: 1676px; margin: auto; min-width: 0; }
+  .inspector { top: 0; max-height: calc(100dvh - 260px); }
+  .page .panel,  .page .program-area,  .page .visualization-area,  .page .inspector-area { scroll-margin-top: var(--sp-5); }
+}
+@media (max-width:759px) { .program-footer-actions { width: 100%; } .program-footer-actions .inspect-line-action { width: 44px; min-width: 44px; } .program-footer-actions .inspect-line-action > span { display: none; } .program-footer-actions .button-primary { flex: 1; } }

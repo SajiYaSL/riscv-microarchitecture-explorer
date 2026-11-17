@@ -1,0 +1,7 @@
+.stat { min-width: 0; padding: var(--sp-4) var(--sp-5); border: 1px solid var(--border-subtle); border-radius: var(--r-md); background: var(--bg-1); }
+.stat-label { font-size: var(--fs-xs); color: var(--text-3); font-weight: 500; }
+.stat strong { display: block; font-size: var(--fs-xl); margin: var(--sp-2) 0; letter-spacing: -.6px; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.stat > span { font-size: var(--fs-xs); color: var(--text-3); }
+.comparison-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--sp-2); padding: var(--sp-4); }
+.comparison-metrics .stat { padding: var(--sp-3); }
+@media (max-width:760px) { .comparison-metrics { grid-template-columns: 1fr; } .stat { padding: var(--sp-3); } }

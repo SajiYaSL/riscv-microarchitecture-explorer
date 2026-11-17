@@ -1,6 +1,6 @@
 {
   "name": "riscv-microarchitecture-explorer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,15 +9,28 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:browser": "node scripts/browser-smoke.mjs"
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test accessibility.spec.ts",
+    "test:visual": "playwright test visuals.spec.ts",
+    "check:ui": "node scripts/check-ui-tokens.mjs",
+    "check:bundle": "node scripts/bundle-report.mjs",
+    "brand:svg": "node scripts/generate-brand.mjs",
+    "brand:png": "node scripts/render-brand.mjs",
+    "brand": "npm run brand:svg && npm run brand:png",
+    "capture:docs": "node scripts/capture-docs.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.0",
+    "@fontsource-variable/jetbrains-mono": "^5.2.0",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.15.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.51.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

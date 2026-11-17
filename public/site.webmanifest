@@ -1,0 +1,21 @@
+{
+  "name": "RVMX · RISC-V Architecture Lab",
+  "short_name": "RVMX",
+  "description": "Explore every cycle of your RISC-V program.",
+  "start_url": "./#/explorer",
+  "display": "standalone",
+  "background_color": "#090d14",
+  "theme_color": "#65e4bd",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

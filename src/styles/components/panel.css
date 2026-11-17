@@ -1,0 +1,6 @@
+.panel { min-width: 0; background: var(--bg-1); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); overflow: hidden; }
+.panel-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-3); min-height: 64px; padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border-subtle); }
+.panel-title { font-size: var(--fs-md); font-weight: 600; margin: 0; }
+.panel-detail { color: var(--text-3); font-size: var(--fs-xs); min-width: 0; }
+.panel h2 { margin-top: 0; }
+@media (max-width:760px) { .panel-header { padding: var(--sp-4); } }
