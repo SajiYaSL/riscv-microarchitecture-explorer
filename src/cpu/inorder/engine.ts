@@ -1,3 +1,4 @@
+import {SIMULATION_LIMITS} from '../../engine/limits';
 import type {Instruction, Program} from '../../engine/assembler';
 
 export type Latch = {id:number; ins:Instruction; value?:number; addr?:number;
@@ -103,7 +104,7 @@ export function step(program:Program, old:Snapshot,timing:InorderTiming=defaultT
   s.halted=!s.fetchLatch&&!s.ifid&&!s.idex&&!s.exmem&&!program.instructions[s.fetchPC/4];
   return s;
 }
-export function runPipeline(program:Program,maxCycles=2000,maxRetired=160,timing:InorderTiming=defaultTiming):Snapshot[]{
+export function runPipeline(program:Program,maxCycles: number=SIMULATION_LIMITS.cycles,maxRetired: number=SIMULATION_LIMITS.retiredInstructions,timing:InorderTiming=defaultTiming):Snapshot[]{
   const history=[initialState()];
   while(!history.at(-1)!.halted&&history.length<=maxCycles&&history.at(-1)!.retired.length<maxRetired)
     history.push(step(program,history.at(-1)!,timing));

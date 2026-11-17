@@ -1,3 +1,4 @@
+import {SIMULATION_LIMITS} from './limits';
 import {runOoo, DEFAULT_CONFIG, validateConfig, type OooSnapshot, type CPUConfig} from '../cpu/ooo/engine';
 import {runPipeline, type Snapshot} from '../cpu/inorder/engine';
 import type {Instruction,Program} from './assembler';
@@ -14,7 +15,7 @@ const reads=(ins:Instruction)=>{
 };
 const writes=(ins:Instruction)=>ins.rd!==undefined && ins.rd!==0?ins.rd:undefined;
 /** Independent sequential ISA oracle: no pipeline timing assumptions. */
-export function executeProgram(program:Program,maxSteps=160):{trace:Trace[];registers:number[];memory:Map<number,number>;truncated:boolean;pc:number;fault?:string}{
+export function executeProgram(program:Program,maxSteps: number=SIMULATION_LIMITS.retiredInstructions):{trace:Trace[];registers:number[];memory:Map<number,number>;truncated:boolean;pc:number;fault?:string}{
  const regs=new Array<number>(32).fill(0),memory=new Map<number,number>(),trace:Trace[]=[];
  let pc=0;let fault:string|undefined;
  execution: while(pc>=0&&pc<program.instructions.length*4&&trace.length<maxSteps){
@@ -40,14 +41,22 @@ export function executeProgram(program:Program,maxSteps=160):{trace:Trace[];regi
 export function simulate(program:Program,mode:Mode,config:CPUConfig=DEFAULT_CONFIG):Simulation{
  const errors=validateConfig(config);if(errors.length)throw Error(errors.join('; '));
  if(mode==='inorder'){
-  const snapshots=runPipeline(program,2000,160,config),last=snapshots.at(-1)!;
+  const snapshots=runPipeline(program,SIMULATION_LIMITS.cycles,SIMULATION_LIMITS.retiredInstructions,config),last=snapshots.at(-1)!;
 
+  const stageHistory = new Map<number, Record<number, Stage>>();
+  for (const snapshot of snapshots) for (const [stage, entry] of Object.entries(snapshot.stages)) {
+   if (!entry) continue;
+   let history = stageHistory.get(entry.id);
+   if (!history) {history = {}; stageHistory.set(entry.id, history);}
+   history[snapshot.cycle] = stage as Stage;
+  }
   const events:Scheduled[]=last.retired.map(l=>{
-   const at=(stage:keyof Snapshot['stages'])=>snapshots.filter(s=>s.stages[stage]?.id===l.id).map(s=>s.cycle);
+   const history = stageHistory.get(l.id) ?? {};
+   const at=(stage:keyof Snapshot['stages'])=>Object.entries(history).filter(([,value])=>value===stage).map(([cycle])=>Number(cycle));
    const fetch=at('IF')[0],decode=at('ID').at(-1)!,execute=at('EX')[0],executeEnd=at('EX').at(-1)!,memory=at('MEM')[0],commit=at('WB')[0];
    return {id:l.id,ins:l.ins,reads:reads(l.ins),write:writes(l.ins),value:l.value,addr:l.addr,store:l.store,
     taken:l.nextPC!==l.ins.pc+4,beforePC:l.ins.pc,afterPC:l.nextPC,fetch,decode,execute,executeEnd,memory,commit,
-    stalls:Math.max(0,execute-fetch-2),unit:0,cycleStages:Object.fromEntries(snapshots.flatMap(s=>Object.entries(s.stages).filter(([,entry])=>entry?.id===l.id).map(([stage])=>[s.cycle,stage as Stage])))};
+    stalls:Math.max(0,execute-fetch-2),unit:0,cycleStages:history};
   });
   const totalCycles=last.cycle,retired=events.length;
   return {mode,events,totalCycles,retired,ipc:retired/totalCycles,cpi:retired?totalCycles/retired:0,

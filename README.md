@@ -95,7 +95,7 @@ The simulation logic is unchanged by the UI redesign:
 
 Supported instructions: **ADD, SUB, AND, OR, XOR, ADDI, MUL, LW, SW, BEQ, BNE, JAL, NOP**. Use x0–x31, labels, signed decimal/hex immediates, and aligned word addresses. Stores become architectural at retirement. Memory is sparse and zero initialized; addresses wrap to 32 bits. Misaligned loads/stores fault, including loads into x0.
 
-This is a simplified RV32 teaching model. It does not implement the full ISA, caches, address speculation, store forwarding, trap handlers, CSRs, interrupts, atomics, or compressed instructions. Runs are bounded to **128 static instructions, 160 retirements, or 2,000 clocks**. Timing describes the simulated model, rather than physical processor performance.
+This is a simplified RV32 teaching model. It does not implement the full ISA, caches, address speculation, store forwarding, trap handlers, CSRs, interrupts, atomics, or compressed instructions. Runs are bounded to **1,024 static instructions, 2,048 retirements, or 20,000 clocks**. Timing describes the simulated model, rather than physical processor performance.
 
 Only execution latencies apply to in-order. Out-of-order capacities and widths are configurable, but dependencies and execution-unit conflicts still limit throughput. Retirement is one instruction per clock. See the model documentation for precise stall and prediction definitions.
 

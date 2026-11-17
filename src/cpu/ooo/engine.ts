@@ -1,3 +1,4 @@
+import {SIMULATION_LIMITS} from '../../engine/limits';
 import type {Instruction, Program} from '../../engine/assembler';
 
 export type Predictor = 'static'|'one-bit'|'two-bit';
@@ -76,10 +77,18 @@ export function stepOoo(program:Program,old:OooSnapshot,config:CPUConfig=DEFAULT
     rat:[...old.rat],committedMap:[...old.committedMap],physical:old.physical.map(p=>({...p})),
     freeList:[...old.freeList],fetchQueue:old.fetchQueue.map(e=>({...e})),decodeQueue:old.decodeQueue.map(e=>({...e})),
     rob:old.rob.map(e=>({...e})),retired:[...old.retired],
-    instructions:old.instructions.map(e=>({...e,history:{...e.history},reason:{...e.reason}})),
+    instructions:[...old.instructions],
     events:[],predictorTable:{...old.predictorTable},unitBusy:{...old.unitBusy},recovery:false};
+  // Clone a lifecycle only when this clock changes it. Completed histories stay shared.
+  const changedLives = new Set<number>();
   const mark=(id:number,phase:Phase,message?:string)=>{
-    const life=s.instructions.find(e=>e.id===id)!;life.history[s.cycle]=phase;
+    const index=s.instructions.findIndex(e=>e.id===id);
+    if (!changedLives.has(id)) {
+      const oldLife=s.instructions[index];
+      s.instructions[index]={...oldLife,history:{...oldLife.history},reason:{...oldLife.reason}};
+      changedLives.add(id);
+    }
+    const life=s.instructions[index];life.history[s.cycle]=phase;
     if(message)life.reason[s.cycle]=message;
     if(phase==='Retire')life.retired=s.cycle;if(phase==='Squash')life.squashed=s.cycle;if(phase==='Fault')life.faulted=s.cycle;
     if(message)s.events.push({kind:phase,id,message});
@@ -207,7 +216,7 @@ export function stepOoo(program:Program,old:OooSnapshot,config:CPUConfig=DEFAULT
   s.halted=!s.rob.length&&!s.fetchQueue.length&&!s.decodeQueue.length&&!program.instructions[s.fetchPC/4];
   return s;
 }
-export function runOoo(program:Program,config:CPUConfig=DEFAULT_CONFIG,maxCycles=2000,maxRetired=160):OooSnapshot[]{
+export function runOoo(program:Program,config:CPUConfig=DEFAULT_CONFIG,maxCycles: number=SIMULATION_LIMITS.cycles,maxRetired: number=SIMULATION_LIMITS.retiredInstructions):OooSnapshot[]{
   const history=[initialOoo(config)];
   while(!history.at(-1)!.halted&&history.length<=maxCycles&&history.at(-1)!.retired.length<maxRetired)
     history.push(stepOoo(program,history.at(-1)!,config));

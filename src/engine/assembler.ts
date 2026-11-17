@@ -1,3 +1,4 @@
+import {SIMULATION_LIMITS} from './limits';
 export type Op = 'ADD'|'ADDI'|'SUB'|'AND'|'OR'|'XOR'|'MUL'|'LW'|'SW'|'BEQ'|'BNE'|'JAL'|'NOP';
 export type Instruction = {pc:number;line:number;text:string;op:Op;rd?:number;rs1?:number;rs2?:number;imm?:number;target?:number};
 export type Program = {instructions:Instruction[];source:string};
@@ -11,7 +12,7 @@ export function assemble(source:string):Program {
   while(true){const m=/^([a-zA-Z_]\w*):\s*/.exec(text);if(!m)break;if(labels.has(m[1]))throw Error(`Line ${i+1}: duplicate label ${m[1]}`);labels.set(m[1],tokens.length*4);text=text.slice(m[0].length).trim();}
   if(text)tokens.push({line:i+1,text,pc:tokens.length*4});
  }
- if(tokens.length>128)throw Error('Program too long: maximum 128 static instructions');
+ if(tokens.length>SIMULATION_LIMITS.staticInstructions)throw Error(`Program too long: maximum ${SIMULATION_LIMITS.staticInstructions} static instructions`);
  if(!tokens.length)throw Error('Enter at least one RISC-V instruction');
  const instructions:Instruction[]=tokens.map(({line,text,pc})=>{
   const [mn,...rest]=text.trim().replace(/,/g,' ').split(/\s+/);const op=mn.toUpperCase() as Op;
