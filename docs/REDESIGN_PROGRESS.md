@@ -34,3 +34,11 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Added timeline/metrics CSV and JSON, SVG/PNG image export, copied run summaries, named experiments with JSON import/export, saved CPU presets, pinned-run comparisons, and a sortable/filterable paginated trace.
 - Performance timeline selection now opens an inspector for the correct independent CPU model.
 - Validation: production build; 90 unit tests; browser workflows for commands/shortcuts, trace filtering, experiment export, pinned comparisons, quiz/progress, Try it, tour, and mobile/desktop captures.
+
+## Phase 5 — Shared components and visualizations
+
+- Completed reusable buttons, segmented controls, tabs, panels, metrics, tooltips, dialogs/drawers/sheets, notifications, status pills, and feedback states; documented their contracts in `components.md`.
+- Rebuilt both processor diagrams with readable nodes, coherent stage colors, keyboard selection, legends, text alternatives, and snapshot details.
+- Added timeline zoom/window controls, cycle jumping, full cell labels, sticky instruction columns, and bounded row rendering. Inactive cells no longer add tab stops.
+- Added synchronized table selection, soft-wrapped source with measured gutter alignment, accessible chart tables, and per-chart image exports.
+- Validation: production build; 90 unit tests; browser checks for stage/row selection, timeline jumps, wrapped alignment, keyboard activation, chart tables, and downloaded standalone SVG/PNG files; visual captures.

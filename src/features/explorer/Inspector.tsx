@@ -2,7 +2,7 @@ import {useEffect, useMemo, useRef} from 'react';
 import {ArrowUpRight, Check, Crosshair, Hash, Info, ListTree, Settings2} from 'lucide-react';
 import {useSimulation} from '../../state/SimulationContext';
 import {uiStore, useUI, type InspectorTab} from '../../state/uiStore';
-import {lifecycles, phaseAt} from '../../components/architecture/Timeline';
+import {lifecycles, phaseAt} from './lifecycles';
 import {stateAt} from '../../engine/simulator';
 import {hex} from '../../components/architecture/shared';
 import {Tabs} from '../../components/ui/Tabs';

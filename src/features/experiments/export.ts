@@ -1,6 +1,6 @@
 import type {Simulation} from '../../engine/simulator';
 import type {CPUConfig} from '../../cpu/ooo/engine';
-import {lifecycles} from '../../components/architecture/Timeline';
+import {lifecycles} from '../explorer/lifecycles';
 
 export function runSummary(sim: Simulation) {
   return {architecture: sim.mode, cycles: sim.totalCycles, retired: sim.retired, ipc: sim.ipc, cpi: sim.cpi, stalls: sim.stalls, truncated: sim.truncated, fault: sim.fault ?? null};
@@ -41,7 +41,10 @@ export async function exportSVGImage(svg: SVGSVGElement, name: string, format: '
   const originals = [svg, ...svg.querySelectorAll('*')]; const copies = [clone, ...clone.querySelectorAll('*')];
   originals.forEach((original, index) => {
     const style = getComputedStyle(original); const copy = copies[index] as SVGElement;
-    for (const property of ['fill', 'stroke', 'stroke-width', 'font-size', 'font-family', 'font-weight', 'opacity', 'text-anchor']) copy.style.setProperty(property, style.getPropertyValue(property));
+    for (const property of ['fill', 'stroke', 'stroke-width', 'font-size', 'font-family', 'font-weight', 'opacity', 'text-anchor']) {
+      const value = style.getPropertyValue(property); copy.style.setProperty(property, value);
+      if (copy.hasAttribute(property)) copy.setAttribute(property, value);
+    }
     copy.removeAttribute('tabindex'); copy.removeAttribute('role');
   });
   const width = svg.viewBox.baseVal.width || svg.width.baseVal.value || svg.clientWidth;

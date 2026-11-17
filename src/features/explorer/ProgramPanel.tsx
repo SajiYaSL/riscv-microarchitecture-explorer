@@ -1,4 +1,5 @@
-import {CheckCircle2, Circle, FileCode2, Play, Sparkles, Terminal} from 'lucide-react';
+import {CheckCircle2, Circle, FileCode2, Play, Sparkles, Terminal, WrapText} from 'lucide-react';
+import {useState} from 'react';
 import {useSimulation} from '../../state/SimulationContext';
 import {simulationActions} from '../../state/simulationStore';
 import {notify, selectInstruction, useUI} from '../../state/uiStore';
@@ -8,15 +9,16 @@ import {AssemblyEditor} from '../../components/editor/AssemblyEditor';
 import {Button} from '../../components/ui/Button';
 
 export function ProgramPanel() {
+  const [softWrap, setSoftWrap] = useState(false);
   const {code, loadedSource, sample, validation, activeLines, lives, current, step} = useSimulation();
   const {selected} = useUI(); const {experience} = useSettings();
   const loaded = code === loadedSource;
   const selectedLine = lives.find(life => life.id === selected)?.ins.line;
   return <section className="panel program-panel" data-tour="editor" aria-labelledby="program-heading">
     <div className="panel-header"><div className="panel-heading-group"><FileCode2 size={18}/><h2 id="program-heading" className="panel-title">Assembly playground</h2></div><span className="pill">RV32 + MUL</span></div>
-    <div className="program-toolbar"><label className="example-select"><span>Example</span><select aria-label="Example program" value={sample} onChange={event => simulationActions.selectExample(event.target.value as ExampleName)}>{Object.keys(EXAMPLES).map(name => <option key={name}>{name}</option>)}</select></label><span className="editor-file-name"><span className="live-dot"/>program.s</span></div>
+    <div className="program-toolbar"><label className="example-select"><span>Example</span><select aria-label="Example program" value={sample} onChange={event => simulationActions.selectExample(event.target.value as ExampleName)}>{Object.keys(EXAMPLES).map(name => <option key={name}>{name}</option>)}</select></label><Button variant="ghost" className="wrap-toggle" aria-pressed={softWrap} onClick={() => setSoftWrap(!softWrap)} title="Wrap long lines"><WrapText/><span>Wrap</span></Button></div>
     {validation && <div id="assembly-error" className="assembly-validation" role="alert"><strong>Check your assembly</strong><span>{validation}</span><small>The previous assembled program is still loaded.</small></div>}
-    <AssemblyEditor value={code} onChange={simulationActions.editCode} activeLines={activeLines} selectedLine={selectedLine} errorLine={Number(validation.match(/line\s+(\d+)/i)?.[1]) || undefined} onSelectLine={line => {
+    <AssemblyEditor value={code} onChange={simulationActions.editCode} activeLines={activeLines} selectedLine={selectedLine} softWrap={softWrap} errorLine={Number(validation.match(/line\s+(\d+)/i)?.[1]) || undefined} onSelectLine={line => {
       if (!loaded) {notify('Assemble your edits before inspecting instructions.'); return;}
       const matching = lives.filter(life => life.ins.line === line);
       const life = [...matching].reverse().find(life => Number(Object.keys(life.history)[0]) <= current) ?? matching[0];

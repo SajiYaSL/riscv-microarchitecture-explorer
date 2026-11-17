@@ -5,7 +5,7 @@ import {compareArchitecturalState} from '../cpu/verification/compare';
 import {useWorkspace, simulationStore, simulationActions} from './simulationStore';
 import {uiStore, notify} from './uiStore';
 import {decodeWorkspace} from './share';
-import {lifecycles} from '../components/architecture/Timeline';
+import {lifecycles} from '../features/explorer/lifecycles';
 import {settingsStore} from './settingsStore';
 import type {Route} from '../app/router';
 
@@ -49,7 +49,7 @@ function useSimulationModel(route: Route) {
     return () => {active = false;};
   }, [route.share, route.path]);
   const fault = pipeline?.fault ?? ooo?.fault;
-  const status = fault ? 'error' : current === total ? sim.truncated ? 'limited' : 'finished' : playing ? 'running' : 'paused';
+  const status: 'error' | 'limited' | 'finished' | 'running' | 'paused' = fault ? 'error' : current === total ? sim.truncated ? 'limited' : 'finished' : playing ? 'running' : 'paused';
   const step = (delta: number) => simulationStore.set({playing: false, cycle: Math.max(0, Math.min(total, current + delta))});
   const togglePlay = () => simulationStore.set({cycle: current === total ? 0 : current, playing: !playing});
   const finish = () => simulationStore.set({playing: false, cycle: total});
