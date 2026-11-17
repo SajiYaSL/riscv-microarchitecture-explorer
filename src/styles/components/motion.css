@@ -1,4 +1,4 @@
-.panel, .program-area, .visualization-area, .inspector-area { scroll-margin-top: 140px; }
+.panel,  .program-area,  .visualization-area,  .inspector-area { scroll-margin-top: 140px; }
 .cycle-summary { height: 68px; min-height: 68px; align-items: center; overflow: hidden; }
 .cycle-summary .status-indicator { margin-top: 0; }
 .cycle-summary-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -9,9 +9,9 @@
 @media (prefers-reduced-motion:no-preference) {
   .moving-instruction-token { transition: transform var(--dur) var(--ease); }
   .cycle-summary-text { animation: cycle-arrive var(--dur) var(--ease); }
-  .changed-reg, .changed-memory { animation: value-change 800ms var(--ease); }
+  .changed-reg,  .changed-memory { animation: value-change 800ms var(--ease); }
   .button-spinner { animation: spin 800ms linear infinite; }
-  .toast, .product-tour { animation: feedback-arrive var(--dur) var(--ease); }
+  .toast,  .product-tour { animation: feedback-arrive var(--dur) var(--ease); }
   .skeleton > div { animation: skeleton-pulse 1200ms var(--ease) infinite alternate; }
   [data-experience=guided] .execution-bar:has(.status-paused) .play-button { box-shadow: 0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent); }
   @keyframes cycle-arrive { from { transform: translateY(3px); } to { transform: translateY(0); } }

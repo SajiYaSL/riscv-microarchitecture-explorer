@@ -1,9 +1,19 @@
 import type {Simulation} from '../../engine/simulator';
 import type {CPUConfig} from '../../cpu/ooo/engine';
 import {lifecycles} from '../explorer/lifecycles';
+import {utilization} from '../performance/metrics';
 
 export function runSummary(sim: Simulation) {
-  return {architecture: sim.mode, cycles: sim.totalCycles, retired: sim.retired, ipc: sim.ipc, cpi: sim.cpi, stalls: sim.stalls, truncated: sim.truncated, fault: sim.fault ?? null};
+  const last = sim.oooSnapshots?.at(-1), busy = utilization(sim, sim.totalCycles);
+  return {architecture: sim.mode, cycles: sim.totalCycles, retired: sim.retired, ipc: sim.ipc, cpi: sim.cpi, stalls: sim.stalls,
+    squashed: last?.squashed ?? sim.snapshots?.at(-1)?.squashed ?? 0,
+    branchesResolved: last?.resolvedBranches ?? null, mispredictions: last?.mispredictions ?? null,
+    predictionAccuracy: last?.resolvedBranches ? 1 - last.mispredictions / last.resolvedBranches : null,
+    recoveryClocks: last?.recoveryCycles ?? null,
+    peakROB: sim.oooSnapshots ? Math.max(...sim.oooSnapshots.map(snapshot => snapshot.rob.length)) : null,
+    peakIssueQueue: sim.oooSnapshots ? Math.max(...sim.oooSnapshots.map(snapshot => snapshot.rob.filter(entry => entry.status === 'waiting').length)) : null,
+    aluBusyClocks: busy.ALU, multiplyBusyClocks: busy.MUL, memoryBusyClocks: busy.MEM, branchBusyClocks: busy.BR,
+    truncated: sim.truncated, fault: sim.fault ?? null};
 }
 export function traceRows(sim: Simulation) {
   return lifecycles(sim).map(life => {

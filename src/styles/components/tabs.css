@@ -1,2 +1,9 @@
-.mode-tabs, .mini-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
-.mode-tabs .active, .mini-tabs [aria-pressed=true] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.segmented-control { display: inline-flex; gap: var(--sp-1); padding: var(--sp-1); background: var(--bg-0); border: 1px solid var(--border-subtle); border-radius: var(--r-md); white-space: nowrap; }
+.segmented-control button { min-height: var(--hit-min); border: 1px solid transparent; border-radius: var(--r-sm); padding: var(--sp-1) var(--sp-3); font-size: var(--fs-xs); background: transparent; color: var(--text-3); }
+.segmented-control [aria-checked=true] { background: var(--bg-3); color: var(--text-1); border-color: var(--border); box-shadow: var(--shadow-1); }
+.tab-list { display: flex; overflow: auto; gap: var(--sp-4); padding: 0 var(--sp-5); border-bottom: 1px solid var(--border-subtle); scrollbar-width: none; }
+.tab-list > button { display: flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; min-height: 54px; padding: var(--sp-3) 0; border: 0; border-bottom: 2px solid transparent; background: transparent; font-size: var(--fs-sm); color: var(--text-3); }
+.tab-list > button[aria-selected=true] { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-count { background: var(--bg-3); color: var(--text-2); border-radius: var(--r-sm); padding: 0 var(--sp-1); min-width: 20px; text-align: center; font-size: var(--fs-xs); }
+.tab-content { min-width: 0; }
+.tab-content:focus { outline-offset: -3px; }

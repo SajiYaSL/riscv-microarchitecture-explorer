@@ -1,40 +1,27 @@
-select, input[type=number], input[type=text], input[type=search] { min-height: var(--hit-min); background: var(--bg-2); color: var(--text-1); border: 1px solid var(--border); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); min-width: 0; }
-.control-deck { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-4); padding: var(--sp-4); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-lg); }
-.cycle-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); }
-.cycle-controls > span { color: var(--text-3); font-size: var(--fs-xs); white-space: nowrap; }
-.cycle-controls b { color: var(--text-1); }
-.clock-scrubber { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-3) var(--sp-1) var(--sp-5); color: var(--text-3); font-size: var(--fs-xs); }
-.clock-scrubber input { flex: 1; min-width: 0; accent-color: var(--accent); }
+select,  input[type=number],  input[type=text],  input[type=search] { min-height: var(--hit-min); background: var(--bg-2); color: var(--text-1); border: 1px solid var(--border); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); min-width: 0; }
 .configuration-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--sp-4); padding: var(--sp-5); }
 .configuration-fields label { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-2); }
-.configuration-fields input, .configuration-fields select { width: 100%; }
-.config-footer { padding: 0 var(--sp-5) var(--sp-5); font-size: var(--fs-sm); }
-.action-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-.validation-error { padding: var(--sp-3) 0; color: var(--danger); }
-.error-banner, .verification-banner { display: flex; gap: var(--sp-3); align-items: center; border: 1px solid var(--danger); border-radius: var(--r-md); padding: var(--sp-4); margin: var(--sp-4) 0; font-size: var(--fs-sm); color: var(--danger); background: var(--danger-soft); }
+.configuration-fields input,  .configuration-fields select { width: 100%; }
+.error-banner,  .verification-banner { display: flex; gap: var(--sp-3); align-items: center; border: 1px solid var(--danger); border-radius: var(--r-md); padding: var(--sp-4); margin: var(--sp-4) 0; font-size: var(--fs-sm); color: var(--danger); background: var(--danger-soft); }
 .verification-banner { color: var(--success); background: var(--success-soft); border-color: var(--success); }
 .verification-banner.unverified { color: var(--warning); background: var(--warning-soft); border-color: var(--warning); }
 .table-wrap { overflow: auto; }
 table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
-th, td { padding: var(--sp-3) var(--sp-4); white-space: nowrap; text-align: left; border-bottom: 1px solid var(--border-subtle); }
+th,  td { padding: var(--sp-3) var(--sp-4); white-space: nowrap; text-align: left; border-bottom: 1px solid var(--border-subtle); }
 th { color: var(--text-3); font-size: var(--fs-xs); font-weight: 500; background: var(--bg-2); }
 td { color: var(--text-2); }
 .bounded-table { max-height: 370px; }
 .bounded-table th { position: sticky; top: 0; z-index: 1; }
 .placeholder { color: var(--text-3); text-align: center; padding: var(--sp-6); white-space: normal; }
-.rob-head, .eligible-entry, .changed-memory { background: var(--accent-soft); }
+.rob-head,  .changed-memory { background: var(--accent-soft); }
 .rob-head td:first-child { border-left: 3px solid var(--accent); }
-.ready-value, .complete-entry td:nth-child(5) { color: var(--success); }
+.ready-value { color: var(--success); }
 .pending-value { color: var(--warning); }
 .speculative-row { background: var(--special-soft); }
-.order-list { padding: var(--sp-4); color: var(--text-2); font-size: var(--fs-sm); overflow-wrap: anywhere; }
-.order-list p { max-height: 120px; overflow: auto; margin: var(--sp-2) 0 var(--sp-3); }
 .reg-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: var(--sp-2); padding: var(--sp-4); }
 .reg-cell { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-1); min-width: 0; border: 1px solid var(--border); background: var(--bg-2); border-radius: var(--r-sm); padding: var(--sp-2); font: var(--fs-xs) var(--font-mono); color: var(--text-2); }
 .selected-reg { background: var(--accent-soft); border-color: var(--accent); }
 .changed-reg strong { color: var(--accent); }
 .register-detail { display: flex; flex-direction: column; gap: var(--sp-1); border-top: 1px solid var(--border-subtle); padding: var(--sp-4); font-size: var(--fs-sm); }
 .register-detail small { color: var(--text-3); font-size: var(--fs-xs); }
-.memory-address { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: space-between; padding: var(--sp-4); color: var(--text-3); font-size: var(--fs-xs); }
-.memory-address input { width: 140px; margin-left: var(--sp-2); }
 @media (max-width:1180px) { .configuration-fields { grid-template-columns: 1fr 1fr; } }

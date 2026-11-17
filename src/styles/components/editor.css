@@ -1,10 +1,8 @@
-.editor-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2); }
-.editor-actions select { max-width: 240px; }
 .assembly-editor { height: 260px; display: flex; font: 14px/26px var(--font-mono); overflow: hidden; background: var(--bg-0); }
 .assembly-editor:focus-within { box-shadow: inset 0 0 0 2px var(--accent); }
 .editor-gutter { flex: 0 0 48px; padding: var(--sp-4) var(--sp-2); overflow: hidden; text-align: right; color: var(--text-3); border-right: 1px solid var(--border-subtle); user-select: none; }
 .code-layer { flex: 1; min-width: 0; position: relative; }
-.code-layer pre, .code-layer textarea { position: absolute; inset: 0; margin: 0; padding: var(--sp-4); font: inherit; tab-size: 2; white-space: pre; border: 0; }
+.code-layer pre,  .code-layer textarea { position: absolute; inset: 0; margin: 0; padding: var(--sp-4); font: inherit; tab-size: 2; white-space: pre; border: 0; }
 .code-layer pre { pointer-events: none; overflow: hidden; color: var(--text-2); }
 .code-layer textarea { resize: none; background: transparent; color: transparent; caret-color: var(--text-1); overflow: auto; -webkit-text-fill-color: transparent; }
 .code-layer textarea::selection { background: color-mix(in srgb, var(--accent) 25%, transparent); }
@@ -14,6 +12,5 @@
 .label { color: var(--accent); }
 .comment { color: var(--text-3); }
 .executing-line { background: var(--accent-soft); box-shadow: inset 2px 0 var(--accent); }
-.editor-footer { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--border-subtle); color: var(--text-3); font-size: var(--fs-xs); }
 .assembly-validation { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-4); background: var(--danger-soft); color: var(--danger); border-bottom: 1px solid var(--danger); font-size: var(--fs-sm); }
 .assembly-validation small { font-size: var(--fs-xs); }

@@ -19,7 +19,7 @@ export function validateWorkspace(value: unknown): WorkspaceInput | null {
   try { assemble(v.loadedSource); } catch { return null; }
   const config = Object.fromEntries(Object.keys(DEFAULT_CONFIG).map(key => [key, v.config![key as keyof CPUConfig]])) as CPUConfig;
   return {code: v.code, loadedSource: v.loadedSource, config, mode: v.mode,
-    sample: typeof v.sample === 'string' && v.sample in EXAMPLES ? v.sample : DEFAULT_WORKSPACE.sample,
+    sample: typeof v.sample === 'string' && Object.hasOwn(EXAMPLES, v.sample) ? v.sample : DEFAULT_WORKSPACE.sample,
     speed: [150, 550, 1000].includes(v.speed ?? 0) ? v.speed! : 550};
 }
 export const simulationStore = createStore<WorkspaceState>(

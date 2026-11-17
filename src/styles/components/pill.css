@@ -1,5 +1,5 @@
 .pill { display: inline-flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-2); font-size: var(--fs-xs); font-weight: 500; border-radius: var(--r-sm); background: var(--bg-3); color: var(--text-2); white-space: nowrap; }
-.pill.green, .pill.good { background: var(--success-soft); color: var(--success); }
+.pill.green,  .pill.good { background: var(--success-soft); color: var(--success); }
 .pill.blue { background: var(--info-soft); color: var(--info); }
 .pill.amber { background: var(--warning-soft); color: var(--warning); }
 .pill.purple { background: var(--special-soft); color: var(--special); }

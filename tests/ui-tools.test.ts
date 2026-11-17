@@ -18,6 +18,7 @@ describe('professional tools', () => {
   it('resolves supported shortcuts without treating arbitrary typing as an action', () => {
     expect(shortcutAction('R')).toBe('reset'); expect(shortcutAction('ArrowRight')).toBe('next');
     expect(shortcutAction(' ')).toBe('play'); expect(shortcutAction('a')).toBeNull();
+    expect(shortcutAction('constructor')).toBeNull();
   });
   it('escapes quotes, newlines, and spreadsheet formulas in CSV exports', () => {
     const csv = toCSV([{instruction: 'ADD "x1",x2,x3', note: '=HYPERLINK("x")', value: -7}]);

@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-17",
+  "scenario": "Production localhost build, desktop 1440 × 1000, first-run welcome for Lighthouse; default OoO replay for interaction timing",
+  "browser": "157.0.8103.78",
+  "lighthouseVersion": "13.6.0",
+  "scores": {
+    "performance": 100,
+    "accessibility": 100,
+    "best-practices": 100
+  },
+  "metrics": {
+    "firstContentfulPaintMs": 202.51389999999998,
+    "largestContentfulPaintMs": 202.51389999999998,
+    "totalBlockingTimeMs": 0,
+    "cumulativeLayoutShift": 0.0002000695265300761
+  },
+  "replay": {
+    "samples": 12,
+    "medianMs": 16.699999999254942,
+    "p95Ms": 16.800000000745058,
+    "measurement": "Click dispatch to next animation frame"
+  },
+  "finalClock": "12"
+}

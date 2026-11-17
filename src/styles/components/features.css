@@ -7,8 +7,8 @@
 .export-options > button { width: 100%; min-height: 44px; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3); border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-2); font-size: var(--fs-xs); text-align: left; }
 .export-options > button:hover { background: var(--bg-hover); color: var(--text-1); }
 .export-options svg { width: 16px; height: 16px; }
-.save-experiment-form, .pin-run-form { display: flex; gap: var(--sp-3); align-items: end; }
-.save-experiment-form label, .pin-run-form label, .share-link-field, .save-preset-row label { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; min-width: 0; color: var(--text-2); font-size: var(--fs-sm); }
+.save-experiment-form,  .pin-run-form { display: flex; gap: var(--sp-3); align-items: end; }
+.save-experiment-form label,  .pin-run-form label,  .share-link-field,  .save-preset-row label { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; min-width: 0; color: var(--text-2); font-size: var(--fs-sm); }
 .share-link-field { margin-bottom: var(--sp-4); }
 .saved-experiment-list { padding: 0; list-style: none; margin: 0 0 var(--sp-5); }
 .saved-experiment-list > li { display: flex; align-items: center; gap: var(--sp-1); padding: var(--sp-3) 0; border-bottom: 1px solid var(--border-subtle); }
@@ -20,7 +20,7 @@
 .pinned-run-list { padding: 0 var(--sp-5) var(--sp-5); }
 .pinned-run-list > div { display: flex; align-items: center; gap: var(--sp-3); border-bottom: 1px solid var(--border-subtle); padding: var(--sp-3) 0; }
 .pinned-run-list > div > div { flex: 1; }
-.pinned-run-list strong, .pinned-run-list span:not(.pin-symbol) { display: block; font-size: var(--fs-sm); }
+.pinned-run-list strong,  .pinned-run-list span:not(.pin-symbol) { display: block; font-size: var(--fs-sm); }
 .pinned-run-list span:not(.pin-symbol) { color: var(--text-3); font-size: var(--fs-xs); }
 .pin-symbol { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: var(--bg-3); color: var(--accent); border-radius: var(--r-md); }
 .pinned-comparison { padding: var(--sp-5); background: var(--bg-2); border-top: 1px solid var(--border-subtle); }
@@ -139,17 +139,12 @@
 .glossary-acronym { color: var(--accent); font: var(--fs-sm) var(--font-mono); background: var(--accent-soft); border-radius: var(--r-sm); padding: var(--sp-2); }
 .glossary-card dt strong { font-size: var(--fs-sm); font-weight: 500; }
 .glossary-card dd { margin: 0; font-size: var(--fs-sm); color: var(--text-2); }
-.glossary-term { min-height: var(--hit-min); min-width: var(--hit-min); display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0; background: none; color: inherit; text-decoration: underline dotted; text-underline-offset: 4px; font: inherit; cursor: help; }
-.tooltip-popover { position: fixed; width: 280px; padding: var(--sp-4); border: 1px solid var(--border-strong); border-radius: var(--r-md); box-shadow: var(--shadow-2); background: var(--bg-2); color: var(--text-1); z-index: 80; font-size: var(--fs-sm); }
-.tooltip-popover strong { font-weight: 550; }
-.tooltip-popover p { margin: var(--sp-2) 0; font-size: var(--fs-xs); color: var(--text-2); }
-.tooltip-popover a { display: inline-flex; align-items: center; min-height: 40px; font-size: var(--fs-xs); }
 .trace-toolbar { display: flex; gap: var(--sp-3); padding: var(--sp-4); flex-wrap: wrap; }
 .trace-toolbar .search-field { flex: 1; min-width: 180px; }
 .trace-view th .text-button { display: flex; align-items: center; gap: var(--sp-2); }
 .selected-row { background: var(--accent-soft); }
 .table-pagination { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); font-size: var(--fs-xs); color: var(--text-3); border-top: 1px solid var(--border-subtle); }
-[data-experience=expert] .program-toolbar, [data-experience=expert] .program-footer { padding-block: var(--sp-2); }
+[data-experience=expert] .program-toolbar,  [data-experience=expert] .program-footer { padding-block: var(--sp-2); }
 [data-experience=expert] .panel-header { min-height: 56px; padding-block: var(--sp-3); }
 @media (min-width:760px) and (max-width:1179px) { .saved-experiments-trigger span { display: none; } .saved-experiments-trigger { justify-content: center; padding-inline: var(--sp-2); } .lesson-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width:759px) {
@@ -171,14 +166,14 @@
   .learning-progress { align-items: start; flex-direction: column; padding: var(--sp-4); gap: var(--sp-4); }
   .learning-progress progress { width: 100%; }
   .learning-filters { flex-direction: column; align-items: stretch; }
-  .lesson-grid, .glossary-grid { grid-template-columns: 1fr; }
+  .lesson-grid,  .glossary-grid { grid-template-columns: 1fr; }
   .lesson-tile { padding: var(--sp-5); }
   .lesson-detail-heading h1 { font-size: 28px; }
   .mini-processor { padding: var(--sp-4); }
   .mini-processor-stages { display: flex; }
   .mini-processor-stages > div { flex: 0 0 130px; }
   .mini-processor-header strong { font-size: var(--fs-sm); }
-  .save-experiment-form, .pin-run-form { flex-direction: column; align-items: stretch; }
+  .save-experiment-form,  .pin-run-form { flex-direction: column; align-items: stretch; }
   .save-experiment-form > .button { width: 100%; }
   .pinned-deltas { grid-template-columns: 1fr; }
   .pinned-deltas > div { flex-direction: row; align-items: center; justify-content: space-between; }

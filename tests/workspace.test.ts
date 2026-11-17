@@ -10,6 +10,7 @@ describe('workspace boundaries', () => {
     expect(validateWorkspace({...DEFAULT_WORKSPACE, config: {...DEFAULT_WORKSPACE.config, robSize: 0}})).toBeNull();
     expect(validateWorkspace({...DEFAULT_WORKSPACE, loadedSource: 'INVALID'})).toBeNull();
     expect(validateWorkspace({...DEFAULT_WORKSPACE, code: 'draft with an error'})).not.toBeNull();
+    expect(validateWorkspace({...DEFAULT_WORKSPACE, sample: 'constructor'})?.sample).toBe(DEFAULT_WORKSPACE.sample);
   });
   it('round-trips Unicode program text and CPU settings through a compressed share link', async () => {
     const source = {...DEFAULT_WORKSPACE, code: '# café — example\nADDI x1,x0,7'};
@@ -21,6 +22,12 @@ describe('workspace boundaries', () => {
     await expect(decodeWorkspace('wrong.value')).rejects.toThrow();
     await expect(decodeWorkspace('2r.' + 'a'.repeat(17000))).rejects.toThrow();
     await expect(encodeWorkspace({...DEFAULT_WORKSPACE, code: 'INVALID'})).rejects.toThrow();
+  });
+  it('bounds decompression before accepting a shared workspace', async () => {
+    const source = new TextEncoder().encode(JSON.stringify({junk: 'a'.repeat(100000)}));
+    const compressed = new Uint8Array(await new Response(new Blob([source]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());
+    const payload = btoa(Array.from(compressed, byte => String.fromCharCode(byte)).join('')).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+    await expect(decodeWorkspace(`2z.${payload}`)).rejects.toThrow('too large');
   });
   it('resolves bookmarkable views and preserves lesson IDs', () => {
     expect(parseRoute('#/performance').view).toBe('performance');

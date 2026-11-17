@@ -56,3 +56,11 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Added explicit modal focus wrapping, correct native Space behavior, independent tab/radio arrow handling, an equivalent full-size source-line inspection action, and error association.
 - Added keyboard/drag-operated inspector sheet snap sizes. Glossary popovers remain inside their owning modal.
 - Validation: production build; 90 unit tests; axe scans of 25 UI states across three themes with zero violations; manual browser automation for focus containment/return, keyboard controls, reduced motion, 200% equivalent layout, sheet gestures, and source inspection; desktop/mobile captures.
+
+## Phase 8 — Performance and regression coverage
+
+- Added 37 reproducible Playwright tests and eight reviewed screenshot baselines, including theme/route accessibility scans, all examples, persistence/sharing, lessons, exports, comparisons, keyboard behavior, and responsive layouts.
+- Expanded workspace tests to cover bounded decompression and guarded imported state. All 91 unit tests pass, including the original 79 CPU tests.
+- Removed unused styles, consolidated primitive styling, bundled only the two needed font assets, and added token/bundle checks.
+- Verified lazy route/chart loading and bounded timeline/trace rendering. Exported metrics now include branch, occupancy, and execution-unit data where available.
+- Production Lighthouse scores: 100 Performance, 100 Accessibility, 100 Best Practices. Default replay p95: 16.8 ms to the next animation frame. See `QUALITY_REPORT.md`.

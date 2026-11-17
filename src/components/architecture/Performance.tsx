@@ -2,21 +2,14 @@ import {useId, useMemo, useRef, useState, type ReactNode} from 'react';
 import {AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, CartesianGrid, ResponsiveContainer, Legend} from 'recharts';
 import {Download, Table2} from 'lucide-react';
 import type {Simulation} from '../../engine/simulator';
-import {unitFor, type Unit} from '../../cpu/ooo/engine';
+import type {Unit} from '../../cpu/ooo/engine';
+import {utilization} from '../../features/performance/metrics';
+export {utilization} from '../../features/performance/metrics';
 import {Panel} from './shared';
 import {Button} from '../ui/Button';
 import {exportSVGImage} from '../../features/experiments/export';
 import {notify} from '../../state/uiStore';
 const units: Unit[] = ['ALU', 'MUL', 'MEM', 'BR'];
-export function utilization(sim: Simulation, cycle: number): Record<Unit, number> {
-  if (sim.oooSnapshots) return sim.oooSnapshots[Math.min(cycle, sim.totalCycles)].unitBusy;
-  const result = {ALU: 0, MUL: 0, MEM: 0, BR: 0};
-  for (const snapshot of sim.snapshots?.slice(0, cycle + 1) ?? []) {
-    const entry = snapshot.stages.EX; if (entry && unitFor(entry.ins) !== 'MEM') result[unitFor(entry.ins)]++;
-    if (snapshot.stages.MEM && unitFor(snapshot.stages.MEM.ins) === 'MEM') result.MEM++;
-  }
-  return result;
-}
 type Datum = Record<string, number | string>;
 function ChartPanel({title, summary, data, columns, children, name}: {title: string; summary: string; data: Datum[]; columns: {key: string; label: string}[]; children: ReactNode; name: string}) {
   const [table, setTable] = useState(false), [page, setPage] = useState(0); const ref = useRef<HTMLDivElement>(null); const id = useId();
