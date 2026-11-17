@@ -18,3 +18,11 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Preserved unsaved drafts separately from the assembled program. Invalid saved or shared configurations cannot reach the engines.
 - Playback pauses on Learn; reload restores work without starting playback.
 - Validation: production build; 84 unit tests; real-browser checks for reload persistence, themes, share restoration in a fresh context, routes, and playback safety; desktop/mobile captures.
+
+## Phase 3 — Workspace layout
+
+- Split the shell, navigation, controls, configuration, explorer, performance, and learning views into focused components.
+- Replaced stacked visualizations with tabs, added a sticky desktop inspector and playback bar, and auto-sized the source editor.
+- Added grouped configuration presets and a pending-change review before applying.
+- Mobile now has labeled bottom navigation, a compact fixed playback bar, and an instruction inspector sheet. Tablet uses an icon rail.
+- Validation: production build; 84 unit tests; browser layout checks at 320, 360, 390, 768, 1180, 1280, and 1440px; selection/preset/sheet interaction checks; desktop/mobile captures.

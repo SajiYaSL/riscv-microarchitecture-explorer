@@ -1,0 +1,5 @@
+import {BookOpen, ArrowUpRight} from 'lucide-react';
+import {concepts} from './concepts';
+export default function LearnPage() {
+  return <><div className="page-heading"><div><div className="page-kicker"><BookOpen size={15}/>A little understanding goes a long way.</div><h1>Learning center<span className="title-dot">.</span></h1><p>Build your intuition, one instruction at a time.</p></div><a className="button button-secondary" href="#/explorer">Open explorer<ArrowUpRight size={16}/></a></div><div className="learn-grid">{concepts.map(([name, description], index) => <section className="panel learn-card" key={name}><span className="pill blue">Concept {String(index + 1).padStart(2, '0')}</span><h2>{name}</h2><p>{description}</p></section>)}</div><div className="callout">Explore the supported instruction set in the <a href="https://docs.riscv.org/reference/isa/unpriv/rv32.html" target="_blank" rel="noreferrer">public RISC-V specification ↗</a>. This teaching model implements a small RV32 subset.</div></>;
+}

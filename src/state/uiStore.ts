@@ -15,6 +15,6 @@ export const uiStore = createStore<UI>(readSaved('rvmx-ui-v2', defaults, value =
 }), 'rvmx-ui-v2', ({tab, split}) => ({tab, split}));
 export const useUI = uiStore.useStore;
 export function selectInstruction(selected: number) {
-  uiStore.set({selected, inspectorTab: 'instruction', inspectorOpen: true});
+  uiStore.set({selected, inspectorTab: 'instruction', inspectorOpen: typeof matchMedia !== 'undefined' && matchMedia('(max-width:759px)').matches});
 }
 export function notify(toast: string) { uiStore.set({toast}); }
