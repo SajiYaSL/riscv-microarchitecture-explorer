@@ -42,3 +42,10 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Added timeline zoom/window controls, cycle jumping, full cell labels, sticky instruction columns, and bounded row rendering. Inactive cells no longer add tab stops.
 - Added synchronized table selection, soft-wrapped source with measured gutter alignment, accessible chart tables, and per-chart image exports.
 - Validation: production build; 90 unit tests; browser checks for stage/row selection, timeline jumps, wrapped alignment, keyboard activation, chart tables, and downloaded standalone SVG/PNG files; visual captures.
+
+## Phase 6 — Polish and motion
+
+- Added instruction tokens that move between real snapshot locations, restrained selection/value feedback, and consistent status presentation.
+- Added a plain-language cycle summary with immediate manual-step announcements and throttled announcements during playback.
+- Stabilized visualization detail and summary heights while stepping. All motion follows reduced-motion preferences.
+- Validation: production build; 90 unit tests; desktop/mobile browser captures without runtime errors or page overflow.

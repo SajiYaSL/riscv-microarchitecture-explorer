@@ -3,11 +3,19 @@ import type {CPUConfig, OooSnapshot} from '../../cpu/ooo/engine';
 import {useUI} from '../../state/uiStore';
 import {Panel, hex} from './shared';
 import {DiagramNode, StageLegend} from './DiagramNode';
+import {InstructionTokens, type InstructionToken} from './InstructionTokens';
 
 const descriptions: Record<string, string> = {Fetch: 'Follow predicted control flow and fetch instructions.', Decode: 'Decode the fetched assembly instructions.', Rename: 'Capture source tags and allocate new physical destinations.', Dispatch: 'Send renamed work into the issue queue.', 'Issue queue': 'Select the oldest ready instruction with an available execution unit.', Execute: 'Compute results independently in the ALU, multiply, memory, and branch units.', ROB: 'Preserve instruction age and wait for completion.', Retire: 'Commit one completed head instruction per clock.'};
 export const OooDiagram = memo(function OooDiagram({s, config, onSelect}: {s: OooSnapshot; config: CPUConfig; onSelect: (id: number) => void}) {
   const [component, setComponent] = useState('ROB'); const {selected} = useUI(); const id = `ooo-${useId().replaceAll(':', '')}`;
   const waiting = s.rob.filter(entry => entry.status === 'waiting'), executing = s.rob.filter(entry => entry.status === 'executing');
+  const tokens: InstructionToken[] = [];
+  const add = (entry: {id: number} | undefined, x: number, y: number, phase: string) => {if (entry && !tokens.some(token => token.id === entry.id)) tokens.push({id: entry.id, x, y, phase});};
+  add(s.fetchQueue[0], 166, 130, 'fetch'); add(s.decodeQueue[0], 424, 130, 'decode');
+  add(s.rob.find(entry => entry.status === 'renamed'), 682, 130, 'rename');
+  add(s.rob.find(entry => s.events.some(event => event.kind === 'Dispatch' && event.id === entry.id)), 940, 130, 'dispatch');
+  (['ALU', 'MUL', 'MEM', 'BR'] as const).forEach((unit, index) => add(executing.find(entry => entry.unit === unit), 366 + index * 180, 338, 'execute'));
+  add(waiting[0], 210, 264, 'issue'); add(s.rob.find(entry => entry.status === 'complete'), 590, 442, 'rob'); add(s.retired.at(-1), 930, 442, 'retire');
   const contents = component === 'Fetch' ? s.fetchQueue : component === 'Decode' ? s.decodeQueue : component === 'Retire' ? s.retired.slice(-8) : component === 'Execute' ? executing : component === 'Issue queue' ? waiting : component === 'Rename' || component === 'Dispatch' ? s.rob.filter(entry => entry.status === 'renamed' || entry.status === 'waiting') : s.rob;
   const frontend = [
     {name: 'Fetch', phase: 'fetch', value: s.fetchQueue.length, detail: `${config.fetchWidth} wide · predicted path`, entries: s.fetchQueue},
@@ -30,6 +38,7 @@ export const OooDiagram = memo(function OooDiagram({s, config, onSelect}: {s: Oo
       <text x="26" y="382" fontSize={13} fill="var(--text-3)">Results complete independently.</text><text x="26" y="403" fontSize={13} fill="var(--text-3)">Architectural state stays ordered.</text>
       <DiagramNode x={382} y={398} width={290} height={100} label="ROB" phase="rob" value={s.rob.length} detail={`${config.robSize} entries · oldest at head`} active={component === 'ROB'} selected={s.rob.some(entry => entry.id === selected)} description={descriptions.ROB} onClick={() => setComponent('ROB')}/>
       <DiagramNode x={714} y={398} width={292} height={100} label="Retire" phase="retire" value={s.retired.length} detail="One instruction per clock" active={component === 'Retire'} selected={s.retired.slice(-8).some(entry => entry.id === selected)} description={descriptions.Retire} onClick={() => setComponent('Retire')}/>
+      <InstructionTokens tokens={tokens}/>
     </svg></div>
     <StageLegend phases={[{phase: 'fetch', label: 'Fetch'}, {phase: 'decode', label: 'Decode'}, {phase: 'rename', label: 'Rename'}, {phase: 'issue', label: 'Issue'}, {phase: 'execute', label: 'Execute'}, {phase: 'rob', label: 'Reorder'}, {phase: 'retire', label: 'Retire'}]}/>
     <div className="component-inspector"><div className="component-inspector-title"><b>{component}</b><span className="muted-text">{contents.length} {contents.length === 1 ? 'instruction' : 'instructions'} shown</span></div><p>{descriptions[component]}</p><div className="inspection-items">{contents.map(entry => <button type="button" key={entry.id} aria-pressed={selected === entry.id} onClick={() => onSelect(entry.id)}>I{entry.id + 1} <span>·</span> {entry.ins.text}</button>)}{!contents.length && <span className="muted-text">Empty this clock. Advance a cycle to see work arrive.</span>}</div><div className="diagram-state-line"><span>Fetch PC <code>{hex(s.fetchPC)}</code></span><span>Committed PC <code>{hex(s.pc)}</code></span>{s.recovery && <strong>Recovering the correct branch path</strong>}</div></div>
