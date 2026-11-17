@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added Physical and RAT views to the Registers inspector, showing cycle-specific values, readiness, allocation, and committed/speculative mappings on desktop and mobile.
+
 ## 2.0.0 — 17 November 2026
 
 - Rebuilt the workspace with fixed playback controls, visualization tabs, a synchronized inspector, a configuration drawer, and labeled mobile navigation.
