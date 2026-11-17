@@ -9,15 +9,15 @@
     "best-practices": 100
   },
   "metrics": {
-    "firstContentfulPaintMs": 202.51389999999998,
-    "largestContentfulPaintMs": 202.51389999999998,
+    "firstContentfulPaintMs": 201.9962,
+    "largestContentfulPaintMs": 201.9962,
     "totalBlockingTimeMs": 0,
     "cumulativeLayoutShift": 0.0002000695265300761
   },
   "replay": {
     "samples": 12,
-    "medianMs": 16.699999999254942,
-    "p95Ms": 16.800000000745058,
+    "medianMs": 16.59999999962747,
+    "p95Ms": 16.700000001117587,
     "measurement": "Click dispatch to next animation frame"
   },
   "finalClock": "12"

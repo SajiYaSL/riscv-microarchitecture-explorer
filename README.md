@@ -1,180 +1,154 @@
-# RVMX — RISC-V Microarchitecture Explorer
+# RVMX · Think inside the machine
 
-An interactive, entirely client-side CPU architecture lab. Write RV32 assembly,
-follow real pipeline state, inspect physical-register dependencies, and compare
-independent in-order and out-of-order execution against an architectural interpreter.
+A few lines of code. A whole machine to understand.
+
+RVMX is a browser-based RISC-V architecture lab for students and engineers. Write assembly, follow real pipeline snapshots, inspect dependencies, and compare independently executed in-order and out-of-order CPUs.
 
 ![RVMX CPU Explorer](docs/screenshots/cpu-explorer.png)
 
-## Features
+## UI v2
 
-- Five-stage in-order CPU with explicit latches, forwarding, load-use bubbles,
-  configurable blocking execution latency, branch redirects and retirement.
-- Independent OoO CPU with physical registers, speculative RAT, committed map,
-  free list, bounded issue queue, oldest-ready selection, four execution units,
-  ROB, in-order retirement and conservative load/store ordering.
-- Static, one-bit and two-bit branch prediction, actual wrong-path execution,
-  younger squash, mapping recovery and precise fatal alignment faults.
-- Clickable SVG architecture diagrams connected to live snapshots.
-- ROB/head eligibility, source readiness/tags, RAT/physical register and LSQ viewers.
-- Syntax-highlighted assembly editor, labels, line numbers, validation and
-  executing-line highlighting; eleven original, explained examples.
-- Run/pause, reset, previous/next clock, finish, animation speed, history slider,
-  instruction lifecycle inspection including squashes and stall reasons.
-- Committed register/memory inspectors with changed-value highlights.
-- Event-derived IPC/CPI, stalls, predictor accuracy, squashes, recovery clocks,
-  queue occupancy and unit utilization charts.
-- Side-by-side independent timelines, completion/retirement order and automatic
-  register/memory/PC/fault verification against the sequential interpreter.
-- Validated CPU configuration; apply resets both engines cleanly.
-- Responsive dark dashboard and architecture learning center.
+- **A focused workspace:** fixed playback controls, visualization tabs, a synchronized inspector, and a configuration drawer with presets and a change preview.
+- **Guided or Expert:** explanations and a five-step tour for learning; denser tools, split views, and trace analysis for deeper inspection.
+- **Work that stays with you:** bookmarkable routes, saved drafts and assembled source, local experiments/presets, and compressed share links that open paused.
+- **Learn by trying:** 13 short lessons with real-snapshot mini-processors, runnable examples, quizzes, saved progress, a searchable glossary, and assembly reference.
+- **Analysis tools:** command search, keyboard shortcuts, pinned-run comparisons, CSV/JSON data, standalone SVG/PNG images, and copied run summaries.
+- **Three themes:** Dark, Light, and High contrast, with bundled Inter and JetBrains Mono fonts.
+- **Mobile support:** labeled bottom navigation, 44px execution controls, a More sheet, and an inspector sheet with drag/keyboard resizing.
 
-No backend, account, paid API or private repository dependency is required.
-This is a simplified **RV32 teaching model**, not full ISA compliance, RTL cycle
-accuracy or a predictor of physical CPU performance.
+The application runs locally in the browser. No backend, account, or paid API is required. Share links include the program and CPU configuration; saved experiments and progress otherwise stay on the device.
 
-## Architecture
+## Start locally
 
-```mermaid
-flowchart LR
-  Source[Assembly editor] --> Parse[Validate / resolve labels]
-  Parse --> IO[IF → ID → EX → MEM → WB]
-  Parse --> OOO[Fetch → Decode → Rename → Dispatch]
-  OOO --> Issue[Oldest-ready issue]
-  Issue --> Units[ALU / MUL / Memory / Branch]
-  Units --> ROB[ROB completion]
-  ROB --> Commit[Ordered retirement]
-  ROB -->|Mispredict: discard younger work| OOO
-  IO --> History[Clock snapshots / visualizations]
-  Commit --> History
-```
-
-Architectural state is distinct from speculative pipeline/rename state. Both
-engines calculate their own values and branches. The interpreter is used only
-for verification. Stores become visible at retirement; squashed operations
-cannot change architectural registers or memory.
-
-## Supported instruction subset
-
-| Instructions | Behavior |
-| --- | --- |
-| ADD, SUB, AND, OR, XOR | 32-bit register operations with wraparound |
-| ADDI | Signed 12-bit immediate |
-| MUL | Low 32-bit product, educational RV32M subset |
-| LW, SW | Aligned 32-bit words, signed 12-bit offset |
-| BEQ, BNE | Conditional control flow to a label |
-| JAL | Label jump with link register |
-| NOP | No effect; still retires |
-
-Use x0–x31, decimal or signed hexadecimal immediates, labels such as `loop:`,
-and offsets such as `0(x1)`. The editor decodes assembly, not machine words.
-Memory is sparse, zero-initialized word storage at unsigned byte addresses
-wrapping modulo 2^32. Misaligned accesses cause a precise fatal simulator fault,
-including loads into x0. No byte accesses or endianness behavior is exposed.
-
-Unsupported: other RV32I/M instructions, RV64, compressed/floating-point/vector
-instructions, atomics, CSRs, interrupts, privileged trap handlers, virtual memory,
-MMIO, caches and self-modifying code. Runs are bounded to 128 static instructions,
-160 retirements or 2,000 clocks. A safety stop is never labeled verified.
-
-## Ubuntu installation and VS Code
-
-Install Git, Node.js **22.12+** and npm using your preferred Ubuntu setup.
-Clone your public repository and open it in VS Code (`code .`). In the integrated
-terminal:
+Use Node.js **22.12+** and npm:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. Select an example and click **Assemble / load**.
-Step clocks or click **Run**. Switch CPU mode to inspect the same program.
-Open **Configure** to apply parameters and reset both histories. **Performance
-Lab** verifies the complete runs and compares independently modeled timing.
+Open the local URL printed by Vite. Choose a Guided or Expert experience, select an example, and use **Assemble / load**. Step one cycle or press **Run**. Edits remain a draft until assembled; the previous program stays loaded while the draft has errors.
+
+**Configure CPU** opens the drawer. Small, Typical, and Wide presets are starting points. **Apply & restart** applies reviewed changes and resets both CPUs.
+
+## Keep the original version
+
+The original application remains on **`main`** at `d86a0d6`. The redesign is on **`redesign/ui-v2`**, with a tested commit for each implementation phase.
 
 ```bash
-npm test              # deterministic unit and differential tests
-npm run test:watch    # watch tests during development
-npm run build         # strict TypeScript + static production build
-npm run preview       # inspect the production build
-npm run test:browser  # optional headless Chrome smoke checks + screenshots
+# Original version
+git switch main
+npm ci
+npm run dev
+
+# New UI
+git switch redesign/ui-v2
+npm ci
+npm run dev
 ```
 
-Browser checks require Google Chrome on PATH, or `CHROME_BIN` pointing to a
-compatible Chromium executable. They use an isolated temporary profile and
-localhost ports 5175/9224; regular tests/build need no browser installation.
+Stop a running development server before switching branches. Use `npm run dev` after switching, or rebuild before using `npm run preview`, so a previous generated `dist/` is not mistaken for the selected branch.
 
-## Configuration and interpretation
+## Workspace
 
-Fetch/decode/issue widths (1–4), ROB size (2–64), physical registers (33–128),
-issue capacity (1–64), ALU latency (1–8), MUL latency (1–16), and predictor mode
-are configurable. Only execution latencies apply to in-order. OoO has one
-nonpipelined unit of each kind and fixed one-instruction retirement width.
-A wide configuration can still be limited by dependencies, unit conflicts,
-physical registers or memory ordering; OoO is not guaranteed to be faster.
+| Route | Purpose |
+| --- | --- |
+| `/#/explorer` | Source editor, datapath, timeline, reorder buffer, rename, scheduler, memory queue, charts, and trace |
+| `/#/performance` | Independent CPU comparison, interpreter verification, pinned runs, and execution metrics |
+| `/#/learn` | Searchable lesson list and assembly reference |
+| `/#/learn/:lessonId` | Concept, interactive mini-processor, runnable example, and quiz |
+| `/#/learn/glossary` | Searchable technical definitions |
 
-Loads/stores wait for all older memory operations to retire. There is no memory
-speculation or store forwarding. Recovery reconstructs mappings functionally;
-recovery clocks count frontend suppression, not a measured counterfactual cost.
-Predictor training/statistics include speculative resolutions. Stall definitions
-and stage-based utilization differ between the two models and are labeled.
+Select an instruction in the editor gutter, diagram, buffer, trace, or timeline to open its inspector. A full-size **Inspect current source line** action is also available beside Assemble. Timeline cells select their clock as well as their instruction. The inspector distinguishes committed register/memory state from speculative rename/queue state.
+
+![Live datapath and inspector](docs/screenshots/datapath.png)
+
+## Keyboard shortcuts
+
+| Key | Action |
+| --- | --- |
+| Space | Run / pause |
+| → / ← | Next / previous cycle |
+| R | Reset |
+| F | Run to completion |
+| [ / ] | Previous / next visualization tab |
+| Ctrl / Command + K | Search commands, examples, views, and settings |
+| ? | Help and shortcuts |
+| Esc | Close a dialog, popover, or tour |
+
+Shortcuts respect typing fields and native control behavior. Tab groups and mode controls use arrow keys; modal dialogs contain focus and restore it when closed. Mobile users can open commands and saved experiments from the workspace menu.
+
+## Analysis and exports
+
+**Export** offers run/trace JSON, timeline CSV/JSON, metrics CSV, an image of the visible diagram/chart, and a copied run summary. Charts also have individual SVG/PNG exports and a **View as table** toggle.
+
+Save named experiments from the sidebar or mobile menu, and import/export them as JSON. Save named CPU presets in the configuration drawer. In Performance Lab, pin up to five runs and compare preserved configurations/results with cycle, IPC, and stall deltas. Runs that fault or reach a safety limit are labeled accordingly.
+
+## CPU model
+
+The simulation logic is unchanged by the UI redesign:
+
+- Five-stage in-order pipeline with forwarding, load-use interlocks, configurable blocking latencies, redirects, and retirement.
+- Independent out-of-order CPU with physical registers, speculative/committed maps, a free list, oldest-ready issue, four execution units, a reorder buffer, and ordered retirement.
+- Static, 1-bit, and 2-bit branch prediction; actual wrong-path execution, younger squash, mapping recovery, and precise fatal alignment faults.
+- Both models are checked against an independent architectural interpreter.
+
+Supported instructions: **ADD, SUB, AND, OR, XOR, ADDI, MUL, LW, SW, BEQ, BNE, JAL, NOP**. Use x0–x31, labels, signed decimal/hex immediates, and aligned word addresses. Stores become architectural at retirement. Memory is sparse and zero initialized; addresses wrap to 32 bits. Misaligned loads/stores fault, including loads into x0.
+
+This is a simplified RV32 teaching model. It does not implement the full ISA, caches, address speculation, store forwarding, trap handlers, CSRs, interrupts, atomics, or compressed instructions. Runs are bounded to **128 static instructions, 160 retirements, or 2,000 clocks**. Timing describes the simulated model, rather than physical processor performance.
+
+Only execution latencies apply to in-order. Out-of-order capacities and widths are configurable, but dependencies and execution-unit conflicts still limit throughput. Retirement is one instruction per clock. See the model documentation for precise stall and prediction definitions.
 
 ## Verification
 
-[CPU verification assembly](examples/cpu-verification.s) checks arithmetic, memory,
-load-use, branches, jumps and x0. Every branch/jump target must have a matching
-label, even if the branch is expected not to be taken.
+```bash
+npm test                  # 91 unit tests; includes all 79 original CPU tests
+npm run check:ui          # tokens, text size, removed legacy selectors
+npm run build             # strict TypeScript + production build
+npm run check:bundle      # initial JavaScript gzip budget
+npx playwright install chromium
+npm run test:browser      # workflows, axe, keyboard, responsive, visual checks
+npm run test:a11y         # accessibility subset
+npm run test:visual       # reviewed screenshot baselines
+```
 
-**79 automated tests** cover directed behavior, state invariants and seeded
-programs. Differential checks compare all registers, memory, retired PC sequence,
-final PC and fatal faults. Real Chrome smoke checks exercise every example,
-both diagrams, stepping/replay, configuration, faults, verified comparison and
-responsive layout. See [verification details](docs/VERIFICATION.md).
+The suite uses the matching Chromium revision installed by Playwright, including in CI. Set `CHROME_BIN` or `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to use another compatible executable for workflow/accessibility checks; visual baselines should use the matching revision because browser font rendering can differ. Review baseline changes before running `npm run test:visual -- --update-snapshots`.
 
-## Static hosting: GitHub and Vercel
+The measured desktop production build scored **100 Performance / 100 Accessibility / 100 Best Practices** in Lighthouse. Initial JavaScript is **about 96 KB gzip**. See [quality results and methodology](docs/QUALITY_REPORT.md).
 
-After tests/build pass, inspect the diff, commit the independent public files,
-and push your existing GitHub branch. Do not overwrite remote history.
+## Accessibility
 
-Import the GitHub repository into Vercel and select **Vite**, build command
-`npm run build`, output directory `dist`. No environment variables are required.
-The existing `vercel.json` supports static SPA routing. Eligible personal projects
-can use Vercel Hobby subject to the provider's current plan terms. This repository
-has been built locally; no new public deployment is claimed.
+The UI targets WCAG 2.2 AA with readable type, contrast-checked themes, named controls, visible focus, a skip link, navigation landmarks, accessible tab/radio groups, modal focus handling, and reduced motion. Charts expose equivalent data tables and diagrams have a text view. Stage/status names accompany color, and live cycle announcements are throttled during playback.
 
-GitHub Actions runs install, tests and build. For GitHub Pages hosting, additionally
-configure Vite's base path to the repository name and add a Pages artifact/deploy
-workflow; the current base `/` targets root hosting such as Vercel.
+Automated axe scans cover all themes and main views plus active tools and dialogs. Keyboard, focus return, sheet gestures, and 200% equivalent layout have been checked in Chrome. The validation scope is recorded in [QUALITY_REPORT.md](docs/QUALITY_REPORT.md).
 
-## Documentation and source
+![Mobile workspace](docs/screenshots/mobile.png)
 
+## Source and hosting
+
+```text
+src/app/         Shell, routes, navigation, execution bar, configuration drawer
+src/features/    Explorer, performance, learning, onboarding, commands, experiments
+src/state/       Workspace, UI, settings, and experiment stores
+src/components/  Reusable controls, editor, processor views, tables, charts
+src/styles/      Tokens, themes, base/layout rules, component styles
+src/cpu/         Independent CPU engines and architectural verification
+src/engine/      Assembler, interpreter/adapters, original example programs
+tests/           Unit tests, Playwright tests, visual baselines
+```
+
+Vite produces static files in `dist/`. `vercel.json` uses `npm run build` and the `dist` output, and hash routes work on static hosts. No environment variables are required. This branch has been implemented and verified locally; it has not been published.
+
+GitHub Actions runs installation, unit tests, token checks, build/bundle checks, Playwright, axe, and visual regression tests. Branding assets are generated from tokens with `npm run brand`.
+
+## Documentation
+
+- [Design system](docs/design-system.md) and [component contracts](docs/components.md)
+- [Redesign brief](docs/RVMX_REDESIGN_PLAN.md), [phase record](docs/REDESIGN_PROGRESS.md), and [baseline audit](docs/UI_UX_AUDIT.md)
 - [Architecture and snapshot APIs](docs/ARCHITECTURE.md)
-- [Upgrade plan and milestone record](docs/ARCHITECTURE_UPGRADE_PLAN.md)
-- [In-order rules](docs/IN_ORDER_CPU.md)
-- [OoO ordering, predictors and recovery](docs/OUT_OF_ORDER_CPU.md)
-- [Verification](docs/VERIFICATION.md)
-- [Performance metric definitions](docs/PERFORMANCE_METRICS.md)
+- [In-order rules](docs/IN_ORDER_CPU.md) and [out-of-order rules](docs/OUT_OF_ORDER_CPU.md)
+- [Verification](docs/VERIFICATION.md) and [performance metric definitions](docs/PERFORMANCE_METRICS.md)
+- [CPU verification example](examples/cpu-verification.s)
+- [Changelog](CHANGELOG.md)
 
-CPU engines are in `src/cpu/`; parser/interpreter/adapters in `src/engine/`;
-React components in `src/components/`; tests in `tests/`. Browser runtime contains
-no Node APIs. Optional browser-test scripts use Node outside the application.
-
-## Roadmap and educational purpose
-
-Future extensions: binary decoding, broader ISA support, byte memory, caches,
-verified store forwarding, pipelined units, branch checkpoints, configurable
-retirement width and trace export. Each requires additional verification before
-being advertised as accurate.
-
-Built for engineering students exploring execution, hazards, renaming,
-speculation and precise retirement. All public implementation and examples are
-independently written. No private source or artifacts are included.
-Public ISA reference: [RISC-V RV32I specification](https://docs.riscv.org/reference/isa/unpriv/rv32.html).
-MIT license; see LICENSE.
-
-<details><summary>Mobile screenshot</summary>
-
-![RVMX mobile workspace](docs/screenshots/mobile.png)
-
-</details>
+MIT license; see [LICENSE](LICENSE). Bundled font notices are included in `public/font-licenses.txt`. Public reference: [RISC-V RV32I specification](https://docs.riscv.org/reference/isa/unpriv/rv32.html).

@@ -16,6 +16,9 @@ test('workspace content and controls fit every supported breakpoint', async ({pa
     await page.setViewportSize({width, height: 1000}); await noPageOverflow(page);
     expect(await page.locator('.execution-top').evaluate(element => element.scrollWidth <= element.clientWidth + 1), `execution controls at ${width}`).toBe(true);
   }
+  await page.evaluate(() => document.querySelector('.visualization-area')!.scrollIntoView({block: 'start'}));
+  expect(await page.locator('.topbar').evaluate(element => element.getBoundingClientRect().top)).toBe(0);
+  expect(await page.locator('.execution-bar').evaluate(element => element.getBoundingClientRect().top)).toBe(80);
   await page.setViewportSize({width: 390, height: 844});
   for (const route of ['/performance', '/learn', '/learn/in-order', '/learn/glossary']) {
     await page.goto(`/#${route}`); await expect(page.locator('h1').first()).toBeVisible(); await noPageOverflow(page);

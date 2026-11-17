@@ -98,3 +98,15 @@ test('blocked storage does not prevent assembly or execution', async ({page}) =>
   await page.getByRole('tab', {name: 'Registers', exact: true}).click();
   await expect(page.getByRole('button', {name: /^Register x1, value 7/})).toBeVisible();
 });
+
+test('mobile menu exposes commands and saved experiments without a keyboard', async ({page}) => {
+  await page.setViewportSize({width: 390, height: 844}); await openWorkspace(page);
+  await page.getByRole('button', {name: 'Open workspace menu', exact: true}).click();
+  await page.getByRole('button', {name: 'Saved experiments', exact: true}).click();
+  await expect(page.getByRole('dialog', {name: 'Your experiments', exact: true})).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', {name: 'Open workspace menu', exact: true}).click();
+  await page.getByRole('button', {name: 'Command menu', exact: true}).click();
+  await page.getByRole('combobox', {name: 'Search commands', exact: true}).fill('glossary'); await page.keyboard.press('Enter');
+  await expect(page.getByRole('searchbox', {name: 'Search glossary', exact: true})).toBeVisible();
+});

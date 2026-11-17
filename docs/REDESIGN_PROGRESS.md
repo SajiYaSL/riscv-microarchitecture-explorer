@@ -64,3 +64,12 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Removed unused styles, consolidated primitive styling, bundled only the two needed font assets, and added token/bundle checks.
 - Verified lazy route/chart loading and bounded timeline/trace rendering. Exported metrics now include branch, occupancy, and execution-unit data where available.
 - Production Lighthouse scores: 100 Performance, 100 Accessibility, 100 Best Practices. Default replay p95: 16.8 ms to the next animation frame. See `QUALITY_REPORT.md`.
+
+## Phase 9 — Documentation and release
+
+- Updated the README, verification guide, design-system/component references, baseline audit context, and v2 changelog.
+- Added token-generated branding, platform icons, social artwork, font notices, app metadata, and reviewed desktop/mobile screenshots.
+- Added CI installation/build/bundle checks plus Playwright, axe, visual regression checks, and report artifacts.
+- Made command search and saved experiments directly accessible from the mobile menu. Fixed section/tour scrolling so the desktop header and controls stay in place, with regression assertions.
+- Standardized visual testing on the pinned Playwright Chromium revision; optional custom Chrome remains available for workflow checks.
+- Final validation: production build; 91 unit tests; 38 browser tests; token/bundle checks; eight visual baselines; screenshot dimensions/appearance; original `main` and engine sources preserved. Local Lighthouse targets are met at 100/100/100.

@@ -1,5 +1,7 @@
 # RVMX UI/UX Audit Brief
 
+This is the baseline audit of `main` at `d86a0d6`, before the UI v2 redesign. See [redesign progress](REDESIGN_PROGRESS.md) and [current quality results](QUALITY_REPORT.md) for the implemented changes.
+
 Source review plus Chrome layout checks at 320–1440px. The dashboard is visually consistent, with accessibility and maintainability as the main improvement areas.
 
 ## 1. Tech stack
@@ -44,7 +46,7 @@ Shared primitives are `Panel` and `Metric`. Sidebar, header, controls, and foote
 
 ## 4. Global styles
 
-Defined in [styles.css](../src/styles.css).
+Defined in `src/styles.css` in the baseline commit.
 
 - **Colors:** background `#090f1d`; sidebar `#0c1424`; panels `#111b2d`; borders `#263249`; primary text `#e8edf7`; muted text `#94a4b9`; teal accent `#42d7c7`. Blue, green, purple, amber, and pink distinguish statuses.
 - **Fonts:** declared `DM Sans` with system fallback; `JetBrains Mono` for code/data. Neither font is bundled or imported; Chrome used a fallback.

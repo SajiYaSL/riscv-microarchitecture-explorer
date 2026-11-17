@@ -1,7 +1,7 @@
 import {defineConfig} from '@playwright/test';
-import {existsSync} from 'node:fs';
 
-const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? process.env.CHROME_BIN ?? (!process.env.CI && !process.env.PLAYWRIGHT_BROWSERS_PATH && existsSync('/usr/bin/google-chrome') ? '/usr/bin/google-chrome' : undefined);
+// Visual baselines use the Chromium revision pinned by package-lock.json.
+const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? process.env.CHROME_BIN;
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,

@@ -43,6 +43,13 @@ test('keyboard controls preserve native actions and contain modal focus', async 
   await page.getByRole('tab', {name: 'Datapath', exact: true}).click();
   await expect(page.locator('.moving-instruction-token').first()).toBeVisible();
   expect(await page.locator('.moving-instruction-token').first().evaluate(element => getComputedStyle(element).transitionDuration)).toBe('0s');
+  await page.getByRole('button', {name: 'Help and shortcuts', exact: true}).click();
+  await page.getByRole('button', {name: /Take the 5-step tour/}).click();
+  for (let index = 0; index < 4; index++) {
+    await page.getByRole('button', {name: 'Next', exact: true}).click();
+    expect(await page.locator('.topbar').evaluate(element => element.getBoundingClientRect().top)).toBe(0);
+  }
+  await page.getByRole('button', {name: 'Ready to explore', exact: true}).click();
 });
 
 test('mobile inspector supports snap heights, keyboard resize, and focus return', async ({page}) => {
