@@ -1,4 +1,6 @@
 select,  input[type=number],  input[type=text],  input[type=search] { min-height: var(--hit-min); background: var(--bg-2); color: var(--text-1); border: 1px solid var(--border); border-radius: var(--r-sm); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); min-width: 0; }
+/* Native popup menus may use a light OS surface unless options have explicit colors. */
+select option, select optgroup { background-color: var(--bg-2); color: var(--text-1); }
 .configuration-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--sp-4); padding: var(--sp-5); }
 .configuration-fields label { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--text-2); }
 .configuration-fields input,  .configuration-fields select { width: 100%; }
