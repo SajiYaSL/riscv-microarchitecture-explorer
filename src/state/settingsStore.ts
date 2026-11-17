@@ -4,7 +4,7 @@ import {initialTheme, type Theme} from '../theme/theme';
 export type Experience = 'guided' | 'expert';
 type Settings = {theme: Theme; experience: Experience; welcomed: boolean; lastRoute: string; completedLessons: string[]};
 const defaults: Settings = {theme: initialTheme(), experience: 'guided', welcomed: false, lastRoute: '/explorer', completedLessons: []};
-export const settingsStore = createStore(readSaved('rvmx-settings-v2', defaults, value => {
+export const settingsStore = createStore<Settings>(readSaved<Settings>('rvmx-settings-v2', defaults, value => {
   if (!value || typeof value !== 'object') return null;
   const v = value as Partial<Settings>;
   return {

@@ -8,12 +8,14 @@ import {OooDiagram, RobViewer, SchedulingViewer, RenameViewer, MemoryQueue} from
 import {Timeline} from '../../components/architecture/Timeline';
 import {Tabs} from '../../components/ui/Tabs';
 import {Button} from '../../components/ui/Button';
+import {availableTabs} from './visualizationTabs';
+import {TraceView} from './TraceView';
 const Performance = lazy(() => import('../../components/architecture/Performance'));
 const labels: Record<VisualizationTab, string> = {datapath: 'Datapath', timeline: 'Timeline', rob: 'Reorder buffer', rename: 'Rename', scheduling: 'Scheduling', memory: 'Memory queue', performance: 'Performance', trace: 'Trace'};
 export function Visualization() {
   const model = useSimulation(); const {tab, selected, split} = useUI(); const {experience} = useSettings();
   const [fit, setFit] = useState(false), [textView, setTextView] = useState(false);
-  const available: VisualizationTab[] = experience === 'guided' ? model.mode === 'ooo' ? ['datapath', 'timeline', 'rob'] : ['datapath', 'timeline'] : model.mode === 'ooo' ? ['datapath', 'timeline', 'rob', 'rename', 'scheduling', 'memory', 'performance'] : ['datapath', 'timeline', 'performance'];
+  const available = availableTabs(model.mode, experience);
   const current = available.includes(tab) ? tab : 'datapath';
   const render = (view: VisualizationTab) => {
     switch (view) {
@@ -24,6 +26,7 @@ export function Visualization() {
       case 'scheduling': return model.ooo ? <SchedulingViewer s={model.ooo} onSelect={selectInstruction}/> : null;
       case 'memory': return model.ooo ? <MemoryQueue s={model.ooo}/> : null;
       case 'performance': return <Suspense fallback={<div className="loading-state">Loading performance charts…</div>}><Performance sim={model.sim} cycle={model.selectedClock}/></Suspense>;
+      case 'trace': return <TraceView/>;
       default: return null;
     }
   };

@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {waitingReason,type OooSnapshot,type CPUConfig,type ROBEntry} from '../../cpu/ooo/engine';
 import {Panel,hex} from './shared';
+import {GlossaryTerm} from '../../features/learn/GlossaryTerm';
 const components=['Fetch','Decode','Rename','Dispatch','Issue queue','Execute','ROB','Retire'] as const;
 export function OooDiagram({s,config,onSelect}:{s:OooSnapshot;config:CPUConfig;onSelect:(id:number)=>void}){
  const [component,setComponent]=useState<string>('ROB');
@@ -39,7 +40,7 @@ export function SchedulingViewer({s,onSelect}:{s:OooSnapshot;onSelect:(id:number
 export function RenameViewer({s}:{s:OooSnapshot}){
  const [tab,setTab]=useState<'rat'|'physical'>('rat');
  return <Panel title="Register renaming" detail={<div className="mini-tabs"><button aria-pressed={tab==='rat'} onClick={()=>setTab('rat')}>RAT</button><button aria-pressed={tab==='physical'} onClick={()=>setTab('physical')}>Physical file</button></div>}>
-  <div className="inspector-note">{s.freeList.length} physical registers free. RAT is speculative; committed mappings change only at retirement.</div>
+  <div className="inspector-note">{s.freeList.length} physical registers free. <GlossaryTerm term="RAT"/> is speculative; committed mappings change only at retirement.</div>
   <div className="table-wrap bounded-table"><table><thead><tr>{(tab==='rat'?['ARCH','COMMITTED MAP','RAT','SPECULATIVE VALUE','READY']:['PHYSICAL','VALUE','READY','ALLOCATION']).map(v=><th key={v}>{v}</th>)}</tr></thead><tbody>
    {tab==='rat'?s.rat.map((p,r)=><tr key={r} className={p!==s.committedMap[r]?'speculative-row':''}><td>x{r}</td><td>p{s.committedMap[r]}</td><td>p{p}</td><td>{s.physical[p].ready?hex(s.physical[p].value):'pending'}</td><td>{s.physical[p].ready?'yes':'no'}</td></tr>):s.physical.map((p,i)=><tr key={i}><td>p{i}</td><td>{hex(p.value)}</td><td>{p.ready?'yes':'no'}</td><td>{s.freeList.includes(i)?'free':s.committedMap.includes(i)?'committed mapping':'allocated / speculative'}</td></tr>)}
   </tbody></table></div>

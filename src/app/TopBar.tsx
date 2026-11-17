@@ -17,8 +17,8 @@ export function TopBar({route}: {route: Route}) {
     try {
       const encoded = await encodeWorkspace(simulationStore.get());
       const link = new URL(location.href); link.hash = `${route.path}?share=${encoded}`;
-      if (navigator.clipboard) {await navigator.clipboard.writeText(link.href); notify('Workspace link copied. Share your experiment.');}
-      else {uiStore.set({dialog: 'share'});}
+      try {await navigator.clipboard.writeText(link.href); notify('Workspace link copied. Share your experiment.');}
+      catch {uiStore.set({shareLink: link.href, dialog: 'share'});}
     } catch (error) {notify((error as Error).message);}
   };
   const controls = <>

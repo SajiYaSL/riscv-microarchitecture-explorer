@@ -6,6 +6,7 @@ import {useWorkspace, simulationStore, simulationActions} from './simulationStor
 import {uiStore, notify} from './uiStore';
 import {decodeWorkspace} from './share';
 import {lifecycles} from '../components/architecture/Timeline';
+import {settingsStore} from './settingsStore';
 import type {Route} from '../app/router';
 
 function useSimulationModel(route: Route) {
@@ -34,13 +35,14 @@ function useSimulationModel(route: Route) {
   }, [playing, total, speed, route.view]);
   useEffect(() => {if (cycle >= total && playing) simulationStore.set({playing: false});}, [cycle, total, playing]);
   useEffect(() => {if (!['explorer', 'performance'].includes(route.view)) simulationStore.set({playing: false});}, [route.view]);
-  useEffect(() => {uiStore.set({selected: null});}, [program, mode, config]);
+  useEffect(() => {uiStore.set({selected: null, inspectorOpen: false, inspectedMode: null});}, [program, mode, config]);
+  useEffect(() => {uiStore.set({selected: null, inspectorOpen: false, inspectedMode: null, ...(route.view === 'explorer' ? {} : {tourStep: -1})});}, [route.view]);
   useEffect(() => {
     if (!route.share) return;
     let active = true;
     decodeWorkspace(route.share).then(input => {
       if (!active) return;
-      simulationActions.restore(input); notify('Shared workspace loaded. Ready when you are.');
+      simulationActions.restore(input); settingsStore.set({welcomed: true}); notify('Shared workspace loaded. Ready when you are.');
       history.replaceState(null, '', `${location.pathname}${location.search}#${route.path}`);
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     }).catch(() => {if (active) notify('This link could not be loaded. Your saved work is safe.');});

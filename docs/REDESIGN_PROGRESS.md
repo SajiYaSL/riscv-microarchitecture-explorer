@@ -26,3 +26,11 @@ Simulation engines under `src/engine/` and `src/cpu/` are preserved.
 - Added grouped configuration presets and a pending-change review before applying.
 - Mobile now has labeled bottom navigation, a compact fixed playback bar, and an instruction inspector sheet. Tablet uses an icon rail.
 - Validation: production build; 84 unit tests; browser layout checks at 320, 360, 390, 768, 1180, 1280, and 1440px; selection/preset/sheet interaction checks; desktop/mobile captures.
+
+## Phase 4 — Guided learning and professional tools
+
+- Added first-run experience choices, a five-step tour, help/shortcuts, a searchable keyboard command menu, and saved Guided/Expert density.
+- Built 13 lessons with real-snapshot mini-processors, runnable examples, two quizzes each, saved completion, glossary search/tooltips, and searchable assembly reference.
+- Added timeline/metrics CSV and JSON, SVG/PNG image export, copied run summaries, named experiments with JSON import/export, saved CPU presets, pinned-run comparisons, and a sortable/filterable paginated trace.
+- Performance timeline selection now opens an inspector for the correct independent CPU model.
+- Validation: production build; 90 unit tests; browser workflows for commands/shortcuts, trace filtering, experiment export, pinned comparisons, quiz/progress, Try it, tour, and mobile/desktop captures.
