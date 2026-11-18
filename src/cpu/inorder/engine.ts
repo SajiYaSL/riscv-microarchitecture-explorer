@@ -1,4 +1,5 @@
 import {SIMULATION_LIMITS} from '../../engine/limits';
+import {appendSnapshotArray} from '../../engine/snapshotArray';
 import type {Instruction, Program} from '../../engine/assembler';
 
 export type Latch = {id:number; ins:Instruction; value?:number; addr?:number;
@@ -26,7 +27,7 @@ export function initialState():Snapshot {
 export function step(program:Program, old:Snapshot,timing:InorderTiming=defaultTiming):Snapshot {
   if(old.halted)return old;
   const s:Snapshot={...old,cycle:old.cycle+1,registers:[...old.registers],memory:new Map(old.memory),
-    retired:[...old.retired],events:[],fetchLatch:null,ifid:null,idex:null,exmem:null,memwb:null,
+    retired:old.retired,events:[],fetchLatch:null,ifid:null,idex:null,exmem:null,memwb:null,
     stages:{IF:null,ID:null,EX:null,MEM:null,WB:null}};
   // Old MEM enters WB; memory stores become architectural only at retirement.
   const wb=old.exmem;
@@ -34,7 +35,7 @@ export function step(program:Program, old:Snapshot,timing:InorderTiming=defaultT
     const rd=destination(wb);
     if(rd!==undefined&&wb.value!==undefined)s.registers[rd]=wb.value;
     if(wb.store!==undefined&&wb.addr!==undefined)s.memory.set(wb.addr,wb.store);
-    s.pc=wb.nextPC;s.retired.push({...wb});s.memwb={...wb};
+    s.pc=wb.nextPC;s.retired=appendSnapshotArray(old.retired,{...wb});s.memwb={...wb};
     s.events.push({kind:'retire',id:wb.id,message:`Retire I${wb.id+1}: ${wb.ins.text}`});
   }
   s.registers[0]=0;

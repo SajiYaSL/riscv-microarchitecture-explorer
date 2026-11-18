@@ -1,4 +1,5 @@
 import {SIMULATION_LIMITS} from '../../engine/limits';
+import {appendSnapshotArray, SnapshotArrayBuilder} from '../../engine/snapshotArray';
 import type {Instruction, Program} from '../../engine/assembler';
 
 export type Predictor = 'static'|'one-bit'|'two-bit';
@@ -76,19 +77,20 @@ export function stepOoo(program:Program,old:OooSnapshot,config:CPUConfig=DEFAULT
   const s:OooSnapshot={...old,cycle:old.cycle+1,registers:[...old.registers],memory:new Map(old.memory),
     rat:[...old.rat],committedMap:[...old.committedMap],physical:old.physical.map(p=>({...p})),
     freeList:[...old.freeList],fetchQueue:old.fetchQueue.map(e=>({...e})),decodeQueue:old.decodeQueue.map(e=>({...e})),
-    rob:old.rob.map(e=>({...e})),retired:[...old.retired],
-    instructions:[...old.instructions],
+    rob:old.rob.map(e=>({...e})),retired:old.retired,
+    instructions:old.instructions,
     events:[],predictorTable:{...old.predictorTable},unitBusy:{...old.unitBusy},recovery:false};
   // Clone a lifecycle only when this clock changes it. Completed histories stay shared.
+  const instructions = new SnapshotArrayBuilder(old.instructions);
   const changedLives = new Set<number>();
   const mark=(id:number,phase:Phase,message?:string)=>{
-    const index=s.instructions.findIndex(e=>e.id===id);
+    // IDs are allocated consecutively and squashed entries remain in the history.
     if (!changedLives.has(id)) {
-      const oldLife=s.instructions[index];
-      s.instructions[index]={...oldLife,history:{...oldLife.history},reason:{...oldLife.reason}};
+      const oldLife=instructions.get(id);
+      instructions.set(id,{...oldLife,history:{...oldLife.history},reason:{...oldLife.reason}});
       changedLives.add(id);
     }
-    const life=s.instructions[index];life.history[s.cycle]=phase;
+    const life=instructions.get(id);life.history[s.cycle]=phase;
     if(message)life.reason[s.cycle]=message;
     if(phase==='Retire')life.retired=s.cycle;if(phase==='Squash')life.squashed=s.cycle;if(phase==='Fault')life.faulted=s.cycle;
     if(message)s.events.push({kind:phase,id,message});
@@ -102,14 +104,15 @@ export function stepOoo(program:Program,old:OooSnapshot,config:CPUConfig=DEFAULT
       mark(head.id,'Fault',`Fault at ROB head: ${head.fault}`);
       squash(new Set([...s.rob.slice(1),...s.fetchQueue,...s.decodeQueue].map(e=>e.id)));
       s.rob=[];s.fetchQueue=[];s.decodeQueue=[];rebuildRename(s);
-      s.events.push({kind:'Recovery',id:head.id,message:`Precise fatal fault: ${head.fault}`});return s;
+      s.events.push({kind:'Recovery',id:head.id,message:`Precise fatal fault: ${head.fault}`});
+      s.instructions=instructions.snapshot();return s;
     }
     if(head.ins.rd&&head.dst!==undefined){
       s.registers[head.ins.rd]=head.value!;s.committedMap[head.ins.rd]=head.dst;
       s.freeList.push(head.oldDst!);
     }
     if(head.store!==undefined)s.memory.set(head.addr!,head.store);
-    s.pc=head.nextPC;s.retired.push({...head});s.rob.shift();
+    s.pc=head.nextPC;s.retired=appendSnapshotArray(old.retired,{...head});s.rob.shift();
     mark(head.id,'Retire',`Retire I${head.id+1} in program order`);
   }
   const busy=new Set<Unit>();
@@ -206,7 +209,7 @@ export function stepOoo(program:Program,old:OooSnapshot,config:CPUConfig=DEFAULT
       const state=s.predictorTable[ins.pc]??(config.predictor==='two-bit'?1:0);
       const taken=ins.op==='JAL'||(['BEQ','BNE'].includes(ins.op)&&config.predictor!=='static'&&state>=(config.predictor==='two-bit'?2:1));
       const e:DynamicInstruction={id:s.nextId++,ins,predictedPC:taken?ins.target!:ins.pc+4,predictionTaken:taken};
-      s.instructions.push({...e,history:{[s.cycle]:'Fetch'},reason:{}});
+      instructions.push({...e,history:{[s.cycle]:'Fetch'},reason:{}});
       s.fetchQueue.push(e);s.fetchPC=e.predictedPC;
     }
     if(s.fetchQueue.length>=frontendCapacity||s.decodeQueue.length>=frontendCapacity)frontendStalled=true;
@@ -214,6 +217,7 @@ export function stepOoo(program:Program,old:OooSnapshot,config:CPUConfig=DEFAULT
   if(frontendStalled)s.stalls++;
   s.registers[0]=0;s.rat[0]=0;s.physical[0]={value:0,ready:true};
   s.halted=!s.rob.length&&!s.fetchQueue.length&&!s.decodeQueue.length&&!program.instructions[s.fetchPC/4];
+  s.instructions=instructions.snapshot();
   return s;
 }
 export function runOoo(program:Program,config:CPUConfig=DEFAULT_CONFIG,maxCycles: number=SIMULATION_LIMITS.cycles,maxRetired: number=SIMULATION_LIMITS.retiredInstructions):OooSnapshot[]{

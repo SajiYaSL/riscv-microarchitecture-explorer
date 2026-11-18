@@ -10,8 +10,8 @@ export function runSummary(sim: Simulation) {
     branchesResolved: last?.resolvedBranches ?? null, mispredictions: last?.mispredictions ?? null,
     predictionAccuracy: last?.resolvedBranches ? 1 - last.mispredictions / last.resolvedBranches : null,
     recoveryClocks: last?.recoveryCycles ?? null,
-    peakROB: sim.oooSnapshots ? Math.max(...sim.oooSnapshots.map(snapshot => snapshot.rob.length)) : null,
-    peakIssueQueue: sim.oooSnapshots ? Math.max(...sim.oooSnapshots.map(snapshot => snapshot.rob.filter(entry => entry.status === 'waiting').length)) : null,
+    peakROB: sim.oooSnapshots ? sim.oooSnapshots.reduce((peak, snapshot) => Math.max(peak, snapshot.rob.length), 0) : null,
+    peakIssueQueue: sim.oooSnapshots ? sim.oooSnapshots.reduce((peak, snapshot) => Math.max(peak, snapshot.rob.filter(entry => entry.status === 'waiting').length), 0) : null,
     aluBusyClocks: busy.ALU, multiplyBusyClocks: busy.MUL, memoryBusyClocks: busy.MEM, branchBusyClocks: busy.BR,
     truncated: sim.truncated, fault: sim.fault ?? null};
 }

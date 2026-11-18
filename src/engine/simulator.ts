@@ -64,7 +64,7 @@ export function simulate(program:Program,mode:Mode,config:CPUConfig=DEFAULT_CONF
  }
  const oooSnapshots=runOoo(program,config),last=oooSnapshots.at(-1)!;
  const events:Scheduled[]=last.retired.map(e=>{
-  const life=last.instructions.find(l=>l.id===e.id)!;
+  const life=last.instructions[e.id];
   const at=(phase:string)=>Number(Object.entries(life.history).find(([,p])=>p===phase)?.[0]??0);
   const execute=at('Issue'),executeEnd=at('Writeback');
   return {id:e.id,ins:e.ins,reads:reads(e.ins),write:writes(e.ins),value:e.value,addr:e.addr,store:e.store,

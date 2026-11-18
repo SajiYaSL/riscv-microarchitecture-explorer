@@ -26,6 +26,19 @@ describe('larger program budgets', () => {
     expect(a.registers[2]).toBe(500); expect(b.registers[2]).toBe(500);
     expect(compareArchitecturalState(p, a, b).verified).toBe(true);
   });
+  it('verifies a loop past both the previous retirement and cycle budgets', () => {
+    const p = assemble('ADDI x1,x0,1000\nloop: ADDI x2,x2,1\nMUL x3,x2,x2\nADDI x1,x1,-1\nBNE x1,x0,loop');
+    const config = {...DEFAULT_CONFIG, multiplyLatency: 16};
+    const a = simulate(p, 'inorder', config), b = simulate(p, 'ooo', config);
+    expect(a.totalCycles).toBeGreaterThan(20000);
+    for (const s of [a, b]) {
+      expect(s.retired).toBe(4001);
+      expect(s.registers[2]).toBe(1000);
+      expect(s.registers[3]).toBe(1000000);
+      expect(s.truncated).toBe(false);
+    }
+    expect(compareArchitecturalState(p, a, b).verified).toBe(true);
+  });
   it('preserves earlier lifecycle snapshots while advancing large histories', () => {
     const p = assemble('ADDI x1,x0,30\nloop: ADDI x1,x1,-1\nBNE x1,x0,loop');
     const history = runOoo(p);

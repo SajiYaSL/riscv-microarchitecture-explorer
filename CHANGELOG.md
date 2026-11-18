@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Raised simulation budgets to 1,024 static instructions, 2,048 retirements, and 20,000 clocks; reduced repeated history copying and pipeline event scanning for larger runs.
+- Raised simulation budgets to 1,024 static instructions, 10,000 retirements, and 100,000 clocks; shared history blocks between snapshots and reduced pipeline event scanning for larger runs.
 - Added Physical and RAT views to the Registers inspector, showing cycle-specific values, readiness, allocation, and committed/speculative mappings on desktop and mobile.
 
 ## 2.0.0 — 17 November 2026
